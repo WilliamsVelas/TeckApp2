@@ -13,10 +13,11 @@ class ProductController extends GetxController {
   //Product
   final RxString name = ''.obs;
   final RxString code = ''.obs;
-  final RxDouble price = 130.0.obs;
-  final RxInt minStock = 10.obs;
+  final RxDouble price = 0.0.obs;
+  final RxInt minStock = 0.obs;
   final RxInt serialsQty = 0.obs;
   final RxInt providerId = 0.obs;
+  final RxInt categoryId = 0.obs;
   final RxString status = 'Activo'.obs;
 
   final dbHelper = DatabaseHelper();
@@ -29,13 +30,13 @@ class ProductController extends GetxController {
 
   Future<void> saveProduct() async {
     final product = Product(
-      name: 'OTRO',
-      code: '0021',
-      price: 130.0,
-      refPrice: 332.10,
+      name: name.value,
+      code: code.value,
+      price: price.value,
+      refPrice: price.value * 56,
       status: 'activo',
-      minStock: 9,
-      serialsQty: 2,
+      minStock: minStock.value,
+      serialsQty: 8,
       categoryId: 1,
       providerId: 1,
       createdAt: DateTime.now(),

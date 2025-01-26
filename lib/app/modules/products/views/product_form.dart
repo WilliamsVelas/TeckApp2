@@ -62,6 +62,16 @@ class ProductForm extends StatelessWidget {
             controller: TextEditingController()
               ..text = productController.minStock.value.toString(),
           ),
+          const SizedBox(height: 12.0),
+          GenericFormInput(
+            label: 'Select provider',
+            keyboardType: TextInputType.number,
+            icon: Icons.store,
+            onChanged: (value) =>
+            productController.minStock.value = int.tryParse(value) ?? 0,
+            controller: TextEditingController()
+              ..text = productController.minStock.value.toString(),
+          ),
           const SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

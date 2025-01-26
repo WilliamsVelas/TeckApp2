@@ -75,6 +75,7 @@ class GenericFormInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.0),
           borderSide: BorderSide.none,
         ),
+        floatingLabelBehavior: FloatingLabelBehavior.never,
         contentPadding: const EdgeInsets.symmetric(
           vertical: 0,
           horizontal: 16.0,
