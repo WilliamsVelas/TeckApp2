@@ -8,6 +8,8 @@ import 'package:teck_app/app/modules/products/views/product_form.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/theme/colors.dart';
 
+import '../../../common/generic_input.dart';
+
 class ProductView extends StatelessWidget {
   final ProductController productController = Get.find<ProductController>();
 
@@ -21,27 +23,14 @@ class ProductView extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      productController.searchProducts(value);
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Buscar producto...',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0,
-                        horizontal: 16.0,
-                      ),
-                    ),
-                  ),
+                GenericInput(
+                  hintText: 'Buscar producto...',
+                  onChanged: (value) {
+                    productController.searchProducts(value);
+                  },
+                  prefixIcon: Icon(Icons.search),
                 ),
+
                 const SizedBox(width: 8),
                 // IconButton(
                 //   icon: const Icon(Icons.filter_list),
@@ -220,24 +209,25 @@ class ProductView extends StatelessWidget {
     );
   }
 
-  void _openProductForm(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: 16.0,
-            left: 16.0,
-            right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: ProductForm(),
-        );
-      },
-    );
-  }
+    void _openProductForm(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppColors.onPrincipalBackground,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+        ),
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.only(
+              top: 16.0,
+              left: 16.0,
+              right: 16.0,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: ProductForm(),
+          );
+        },
+      );
+    }
 }

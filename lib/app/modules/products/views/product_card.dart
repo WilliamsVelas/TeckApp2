@@ -50,16 +50,12 @@ class ProductCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
 
             // Stock actual
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  '${product.minStock}',
-                  style: const TextStyle(color: Colors.blue),
-                ),
                 Text(
                   'Stock: ${product.serialsQty}',
                   style: const TextStyle(color: AppColors.principalGray),

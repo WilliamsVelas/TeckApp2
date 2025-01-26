@@ -11,11 +11,12 @@ class ProductController extends GetxController {
   final RxString sortCriteria = ''.obs;
 
   //Product
-  final RxString name = 'Q3'.obs;
-  final RxString code = '00021'.obs;
+  final RxString name = ''.obs;
+  final RxString code = ''.obs;
   final RxDouble price = 130.0.obs;
   final RxInt minStock = 10.obs;
-  final RxInt providerId = 1.obs;
+  final RxInt serialsQty = 0.obs;
+  final RxInt providerId = 0.obs;
   final RxString status = 'Activo'.obs;
 
   final dbHelper = DatabaseHelper();
