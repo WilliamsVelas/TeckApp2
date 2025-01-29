@@ -31,6 +31,7 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    //products table
     await db.execute('''
     CREATE TABLE products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,10 +40,147 @@ class DatabaseHelper {
       price REAL DEFAULT 0.0,
       refPrice REAL,
       status TEXT DEFAULT 'activo' CHECK (status IN ('activo', 'inactivo', 'vendido', 'afectado')),
-      minStock INTEGER DEFAULT 0,
-      serialsQty INTEGER DEFAULT 0,
-      categoryId INTEGER DEFAULT 0,
-      providerId INTEGER DEFAULT 0,
+      minStock INTEGER,
+      imageId INTEGER,
+      serialsQty INTEGER,
+      categoryId INTEGER,
+      providerId INTEGER,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //categories table
+    await db.execute('''
+    CREATE TABLE categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      code TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //payment methods table
+    await db.execute('''
+    CREATE TABLE paymentMethods (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      code TEXT,
+      amount REAL,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //user table
+    await db.execute('''
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      lastName TEXT,
+      username TEXT,
+      password TEXT,
+      amount REAL,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //clients table
+    await db.execute('''
+    CREATE TABLE clients (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      lastName TEXT,
+      businessName TEXT,
+      bankAccount TEXT,
+      codeBank TEXT,
+      affiliateCode TEXT,
+      value TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //providers table
+    await db.execute('''
+    CREATE TABLE providers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      lastName TEXT,
+      businessName TEXT,
+      value TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //images table
+    await db.execute('''
+    CREATE TABLE images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uri TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //serials table
+    await db.execute('''
+    CREATE TABLE serials (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      productId INTEGER,
+      serial TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //bank account table
+    await db.execute('''
+    CREATE TABLE banckAccounts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bankName TEXT,
+      numberAccount TEXT,
+      code TEXT,
+      clientId INTEGER,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //invoices table
+    await db.execute('''
+    CREATE TABLE invoices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      documentNo TEXT,
+      type TEXT,
+      totalAmount REAL,
+      totalPayed REAL,
+      refTotalAmount REAL,
+      refTotalPayed REAL,
+      qty INTEGER
+      clientId INTEGER
+      bankAccountId INTEGER
+      productId INTEGER,
+      createdAt TEXT,
+      updatedAt TEXT
+    )
+  ''');
+
+    //invoice line table
+    await db.execute('''
+    CREATE TABLE invoiceLine (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      productName TEXT,
+      productPrice REAL,
+      refProductPrice REAL,
+      total REAL,
+      refTotal REAL,
+      productId INTEGER,
+      productSerial TEXT,
+      invoiceId INTEGER,
       createdAt TEXT,
       updatedAt TEXT
     )
@@ -54,12 +192,15 @@ class DatabaseHelper {
     db.close();
   }
 
-  //Product
+  //Products
+
+  //Insert product
   Future<int> insertProduct(Product product) async {
     final db = await database;
     return await db.insert('products', product.toMap());
   }
 
+  //Get products
   Future<List<Product>> getProducts() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('products');
@@ -69,6 +210,7 @@ class DatabaseHelper {
     });
   }
 
+  //Update product
   Future<int> updateProduct(Product product) async {
     final db = await database;
     product.updatedAt = DateTime.now();
@@ -79,6 +221,4 @@ class DatabaseHelper {
       whereArgs: [product.id],
     );
   }
-
-
 }
