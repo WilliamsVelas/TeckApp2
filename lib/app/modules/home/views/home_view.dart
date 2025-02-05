@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:teck_app/app/modules/invoices/views/invoice_view.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/theme/colors.dart';
 
@@ -19,6 +20,7 @@ class _HomeViewState extends State<HomeView> {
       ),
     ),
     ProductView(),
+    InvoiceView(),
   ];
 
   void _onTabSelected(int index) {
@@ -57,7 +59,7 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top; 
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Container(
       padding: EdgeInsets.only(
@@ -146,4 +148,3 @@ class CustomBottomNavigationBar extends StatelessWidget {
     );
   }
 }
-
