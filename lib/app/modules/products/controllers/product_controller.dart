@@ -4,11 +4,12 @@ import 'package:teck_app/app/database/models/products_model.dart';
 
 class ProductController extends GetxController {
   final RxList<Product> products = <Product>[].obs;
-  final RxList<Product> filteredProducts = <Product>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString selectedStatus = ''.obs;
   final RxInt selectedProviderId = 0.obs;
   final RxString sortCriteria = ''.obs;
+
+  final RxList<Product> originalProducts = <Product>[].obs;
 
   //Product
   final RxString name = ''.obs;
@@ -63,7 +64,7 @@ class ProductController extends GetxController {
   void fetchAllProducts() async {
     final List<Product> allProducts = await dbHelper.getProducts();
     products.assignAll(allProducts);
-    filteredProducts.assignAll(allProducts);
+    originalProducts.assignAll(allProducts);
   }
 
   void searchProducts(String query) {
@@ -71,13 +72,13 @@ class ProductController extends GetxController {
     applyFilters();
   }
 
-  void filterByStatus(String status) {
-    selectedStatus.value = status;
+  void filterByStatus(String? status) {
+    selectedStatus.value = status ?? '';
     applyFilters();
   }
 
-  void filterByProvider(int providerId) {
-    selectedProviderId.value = providerId;
+  void filterByProvider(int? providerId) {
+    selectedProviderId.value = providerId ?? 0;
     applyFilters();
   }
 
@@ -87,24 +88,25 @@ class ProductController extends GetxController {
   }
 
   void applyFilters() {
-    var tempProducts = products.where((product) {
+    final filtered = originalProducts.where((product) {
       final matchesSearch = searchQuery.isEmpty ||
-          product.name.contains(searchQuery.value) ||
-          product.code!.contains(searchQuery.value);
-      final matchesStatus =
-          selectedStatus.isEmpty || product.status == selectedStatus.value;
-      final matchesProvider = selectedProviderId.value == 0 ||
-          product.providerId == selectedProviderId.value;
+          product.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          (product.code?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
+
+      final matchesStatus = selectedStatus.isEmpty || product.status == selectedStatus.value;
+      final matchesProvider = selectedProviderId.value == 0 || product.providerId == selectedProviderId.value;
+
       return matchesSearch && matchesStatus && matchesProvider;
     }).toList();
 
     if (sortCriteria.value == 'date') {
-      tempProducts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else if (sortCriteria.value == 'price') {
-      tempProducts.sort((a, b) => a.price.compareTo(b.price));
+      filtered.sort((a, b) => a.price.compareTo(b.price));
     } else if (sortCriteria.value == 'stock') {
-      tempProducts.sort((a, b) => a.minStock.compareTo(b.minStock));
+      filtered.sort((a, b) => a.minStock.compareTo(b.minStock));
     }
-    filteredProducts.assignAll(tempProducts);
+
+    products.value = filtered;
   }
 }

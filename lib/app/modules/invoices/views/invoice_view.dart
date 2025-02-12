@@ -10,7 +10,7 @@ import '../../../common/generic_input.dart';
 import '../widgets/invoice_form.dart';
 
 class InvoiceView extends StatelessWidget {
-  final InvoiceController invoiceController = Get.find<InvoiceController>();
+  // final InvoiceController invoiceController = Get.find<InvoiceController>();
 
   @override
   Widget build(BuildContext context) {

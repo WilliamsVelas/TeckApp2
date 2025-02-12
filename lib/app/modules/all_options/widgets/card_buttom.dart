@@ -27,7 +27,7 @@ class CardButton extends StatelessWidget {
         ),
         color: color,
         child: Container(
-          width: 100,
+          width: 110,
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -38,6 +38,7 @@ class CardButton extends StatelessWidget {
                 name,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),

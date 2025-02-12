@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
-import 'package:teck_app/app/modules/invoices/controllers/invoice_controller.dart';
+import 'package:teck_app/app/modules/dashboard/controllers/dashboard_controller.dart';
 
 import '../../../common/navigationBar/controllers/navigation_controller.dart';
 
-class InvoiceBinding extends Bindings{
+class DashboardBinding extends Bindings{
   @override
   void dependencies(){
-    Get.lazyPut<InvoiceController>(()=> InvoiceController());
+    Get.lazyPut<DashboardController>(() => DashboardController());
     Get.lazyPut<BottomNavigationController>(() => BottomNavigationController());
   }
 }

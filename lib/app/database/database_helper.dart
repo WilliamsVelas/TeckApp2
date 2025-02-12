@@ -2,6 +2,8 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
+import 'models/categories_model.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
@@ -193,7 +195,6 @@ class DatabaseHelper {
   }
 
   //Products
-
   //Insert product
   Future<int> insertProduct(Product product) async {
     final db = await database;
@@ -220,5 +221,79 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [product.id],
     );
+  }
+
+  Future<int> desactiveProduct(Product product) async {
+    final db = await database;
+    product.status = 'inactivo';
+    product.updatedAt = DateTime.now();
+
+    return await db.update(
+      'products',
+      product.toMap(),
+      where: 'id = ?',
+      whereArgs: [product.id],
+    );
+  }
+
+  Future<Product?> getProductById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'products',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Product.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Categories
+  // Insert category
+  Future<int> insertCategory(Category category) async {
+    final db = await database;
+    return await db.insert('categories', category.toMap());
+  }
+
+  // Get all categories
+  Future<List<Category>> getCategories() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('categories');
+
+    return List.generate(maps.length, (i) {
+      return Category.fromMap(maps[i]);
+    });
+  }
+
+  // Update category
+  Future<int> updateCategory(Category category) async {
+    final db = await database;
+    return await db.update(
+      'categories',
+      category.toMap(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
+  }
+
+  // Get category by ID
+  Future<Category?> getCategoryById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'categories',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Category.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 }

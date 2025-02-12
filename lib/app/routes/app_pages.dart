@@ -1,4 +1,8 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:teck_app/app/modules/all_options/bindings/all_options_binding.dart';
+import 'package:teck_app/app/modules/all_options/views/all_options_view.dart';
+import 'package:teck_app/app/modules/categories/bindings/categories_binding.dart';
+import 'package:teck_app/app/modules/categories/views/categories_view.dart';
 import 'package:teck_app/app/modules/home/bindings/home_binding.dart';
 import 'package:teck_app/app/modules/home/views/home_view.dart';
 import 'package:teck_app/app/modules/products/bindings/product_binding.dart';
@@ -15,12 +19,17 @@ class AppPages {
       page: () => HomeView(),
       binding: HomeBinding(),
     ),
-
-    //Product view
-    // GetPage(
-    //   name: AppRoutes.PRODUCTS,
-    //   page: () => ProductViews(),
-    //   binding: ProductBinding(),
-    // ),
+    //Menu all view
+    GetPage(
+      name: AppRoutes.MENUALL,
+      page: () => AllOptionsView(),
+      binding: AllOptionsBinding(),
+    ),
+    //Categories view
+    GetPage(
+      name: AppRoutes.CATEGORIES,
+      page: () => CategoriesView(),
+      binding: CategoriesBinding(),
+    ),
   ];
 }
