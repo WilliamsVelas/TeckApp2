@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:teck_app/app/modules/all_options/views/all_options_view.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/theme/colors.dart';
+
+import '../../all_options/views/all_options_view.dart';
+import '../../invoices/views/invoice_view.dart';
 
 class HomeView extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ class _HomeViewState extends State<HomeView> {
       ),
     ),
     ProductView(),
+    InvoiceView(),
     AllOptionsView(),
   ];
 
