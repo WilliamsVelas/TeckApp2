@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:teck_app/app/modules/all_options/views/all_options_view.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/theme/colors.dart';
 
@@ -19,6 +20,7 @@ class _HomeViewState extends State<HomeView> {
       ),
     ),
     ProductView(),
+    AllOptionsView(),
   ];
 
   void _onTabSelected(int index) {

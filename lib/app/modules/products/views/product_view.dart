@@ -5,7 +5,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:teck_app/app/modules/products/controllers/product_controller.dart';
 import 'package:teck_app/app/modules/products/views/product_card.dart';
 import 'package:teck_app/app/modules/products/views/product_form.dart';
-import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/theme/colors.dart';
 
 import '../../../common/generic_input.dart';
@@ -209,7 +208,7 @@ class ProductView extends StatelessWidget {
     );
   }
 
-    void _openProductForm(BuildContext context) {
+  void _openProductForm(BuildContext context) {
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.onPrincipalBackground,

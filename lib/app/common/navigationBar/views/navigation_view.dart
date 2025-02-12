@@ -5,7 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:teck_app/app/common/navigationBar/controllers/navigation_controller.dart';
 import 'package:teck_app/theme/colors.dart';
 
-class CustomBottomNavigationBarw extends StatelessWidget {
+class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomNavController = Get.find<BottomNavigationController>();
