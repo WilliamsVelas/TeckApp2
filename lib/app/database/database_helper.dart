@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
 import 'models/categories_model.dart';
+import 'models/clients_model.dart';
 import 'models/payment_method_model.dart';
 
 class DatabaseHelper {
@@ -352,6 +353,64 @@ class DatabaseHelper {
 
     if (maps.isNotEmpty) {
       return PaymentMethod.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Clients
+  // Insert client
+  Future<int> insertClient(Client client) async {
+    final db = await database;
+    return await db.insert('clients', client.toMap());
+  }
+
+  // Get all clients
+  Future<List<Client>> getClients() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('clients');
+
+    return List.generate(maps.length, (i) {
+      return Client.fromMap(maps[i]);
+    });
+  }
+
+  // Update client
+  Future<int> updateClient(Client client) async {
+    final db = await database;
+    return await db.update(
+      'clients',
+      client.toMap(),
+      where: 'id = ?',
+      whereArgs: [client.id],
+    );
+  }
+
+  //Desactive client (actualiza solo el timestamp)
+  Future<int> desactiveClient(Client client) async {
+    final db = await database;
+    client.updatedAt = DateTime.now();
+
+    return await db.update(
+      'clients',
+      client.toMap(),
+      where: 'id = ?',
+      whereArgs: [client.id],
+    );
+  }
+
+  // Get client by ID
+  Future<Client?> getClientById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'clients',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Client.fromMap(maps.first);
     } else {
       return null;
     }

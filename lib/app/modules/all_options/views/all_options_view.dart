@@ -27,6 +27,13 @@ class AllOptionsView extends StatelessWidget {
       'color': Colors.blue,
       'iconColor': AppColors.onPrincipalBackground,
     },
+    {
+      'icon': Icons.group,
+      'name': 'Clientes',
+      'route': AppRoutes.CLIENTS,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
   ];
 
   @override
