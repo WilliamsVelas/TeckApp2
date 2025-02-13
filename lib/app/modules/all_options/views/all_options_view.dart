@@ -18,7 +18,14 @@ class AllOptionsView extends StatelessWidget {
       'name': 'Categorias',
       'route': AppRoutes.CATEGORIES,
       'color': Colors.blue,
-      'iconColor': Colors.black,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
+      'icon': Icons.payments_outlined,
+      'name': 'Metodos de pago',
+      'route': AppRoutes.PAYMENTMETHOD,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
     },
   ];
 
@@ -34,26 +41,29 @@ class AllOptionsView extends StatelessWidget {
         ),
         title: const Text(''),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1,
+      body: Container(
+        color: AppColors.onPrincipalBackground,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1,
+            ),
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final option = options[index];
+              return CardButton(
+                onPress: () => Get.toNamed(option['route']),
+                icon: option['icon'],
+                name: option['name'],
+                color: option['color'],
+                iconColor: option['iconColor'],
+              );
+            },
           ),
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            final option = options[index];
-            return CardButton(
-              onPress: () => Get.toNamed(option['route']),
-              icon: option['icon'],
-              name: option['name'],
-              color: option['color'],
-              iconColor: option['iconColor'],
-            );
-          },
         ),
       ),
     );

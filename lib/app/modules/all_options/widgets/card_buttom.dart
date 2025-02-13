@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:teck_app/theme/colors.dart';
 
 class CardButton extends StatelessWidget {
   final VoidCallback onPress;
@@ -27,20 +28,20 @@ class CardButton extends StatelessWidget {
         ),
         color: color,
         child: Container(
-          width: 110,
-          padding: const EdgeInsets.all(12),
+          width: 140,
+          padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: iconColor),
-              const SizedBox(height: 8),
+              Icon(icon, size: 35, color: iconColor),
+              const SizedBox(height: 4),
               Text(
                 name,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.onPrincipalBackground,
                 ),
               ),
             ],

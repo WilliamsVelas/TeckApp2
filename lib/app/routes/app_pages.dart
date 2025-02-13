@@ -5,6 +5,8 @@ import 'package:teck_app/app/modules/categories/bindings/categories_binding.dart
 import 'package:teck_app/app/modules/categories/views/categories_view.dart';
 import 'package:teck_app/app/modules/home/bindings/home_binding.dart';
 import 'package:teck_app/app/modules/home/views/home_view.dart';
+import 'package:teck_app/app/modules/payment_method/bindings/payment_method_binding.dart';
+import 'package:teck_app/app/modules/payment_method/views/payment_method_view.dart';
 import 'package:teck_app/app/modules/products/bindings/product_binding.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/app/routes/app_routes.dart';
@@ -30,6 +32,12 @@ class AppPages {
       name: AppRoutes.CATEGORIES,
       page: () => CategoriesView(),
       binding: CategoriesBinding(),
+    ),
+    //Categories view
+    GetPage(
+      name: AppRoutes.PAYMENTMETHOD,
+      page: () => PaymentMethodView(),
+      binding: PaymentMethodBinding(),
     ),
   ];
 }

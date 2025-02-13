@@ -1,16 +1,14 @@
 class PaymentMethod {
   int? id;
-  String? name;
-  String? code;
-  double? amount;
+  String name;
+  String code;
   DateTime createdAt;
   DateTime? updatedAt;
 
   PaymentMethod({
     this.id,
-    this.name,
-    this.code,
-    this.amount,
+    required this.name,
+    required this.code,
     required this.createdAt,
     this.updatedAt,
   });
@@ -20,7 +18,6 @@ class PaymentMethod {
       'id': id,
       'name': name,
       'code': code,
-      'amount': amount,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -29,9 +26,8 @@ class PaymentMethod {
   factory PaymentMethod.fromMap(Map<String, dynamic> map) {
     return PaymentMethod(
       id: map['id'] as int?,
-      name: map['name'] as String?,
-      code: map['code'] as String?,
-      amount: map['amount'] as double?,
+      name: map['name'] as String,
+      code: map['code'] as String,
       createdAt: DateTime.parse(map['createdAt'] as String),
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)

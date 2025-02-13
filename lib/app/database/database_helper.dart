@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
 import 'models/categories_model.dart';
+import 'models/payment_method_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -69,7 +70,6 @@ class DatabaseHelper {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       code TEXT,
-      amount REAL,
       createdAt TEXT,
       updatedAt TEXT
     )
@@ -223,6 +223,7 @@ class DatabaseHelper {
     );
   }
 
+  //Desactive product
   Future<int> desactiveProduct(Product product) async {
     final db = await database;
     product.status = 'inactivo';
@@ -236,6 +237,7 @@ class DatabaseHelper {
     );
   }
 
+  //Get product by id
   Future<Product?> getProductById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -292,6 +294,64 @@ class DatabaseHelper {
 
     if (maps.isNotEmpty) {
       return Category.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Payment Methods
+  // Insert payment method
+  Future<int> insertPaymentMethod(PaymentMethod paymentMethod) async {
+    final db = await database;
+    return await db.insert('paymentMethods', paymentMethod.toMap());
+  }
+
+  // Get all payment methods
+  Future<List<PaymentMethod>> getPaymentMethods() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('paymentMethods');
+
+    return List.generate(maps.length, (i) {
+      return PaymentMethod.fromMap(maps[i]);
+    });
+  }
+
+  // Update payment method
+  Future<int> updatePaymentMethod(PaymentMethod paymentMethod) async {
+    final db = await database;
+    return await db.update(
+      'paymentMethods',
+      paymentMethod.toMap(),
+      where: 'id = ?',
+      whereArgs: [paymentMethod.id],
+    );
+  }
+
+  //Desactive payment method
+  Future<int> desactivePaymentMethod(PaymentMethod paymentMethod) async {
+    final db = await database;
+    paymentMethod.updatedAt = DateTime.now();
+
+    return await db.update(
+      'paymentMethods',
+      paymentMethod.toMap(),
+      where: 'id = ?',
+      whereArgs: [paymentMethod.id],
+    );
+  }
+
+  // Get payment method by ID
+  Future<PaymentMethod?> getPaymentMethodById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'paymentMethods',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return PaymentMethod.fromMap(maps.first);
     } else {
       return null;
     }
