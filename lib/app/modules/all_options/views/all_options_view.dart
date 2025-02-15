@@ -41,6 +41,27 @@ class AllOptionsView extends StatelessWidget {
       'color': Colors.blue,
       'iconColor': AppColors.onPrincipalBackground,
     },
+    {
+      'icon': Icons.stacked_bar_chart,
+      'name': 'Estadisticas',
+      'route': AppRoutes.PROVIDERS,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
+      'icon': Icons.inventory_outlined,
+      'name': 'Reportes',
+      'route': AppRoutes.PROVIDERS,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
+      'icon': Icons.settings,
+      'name': 'Configuracion',
+      'route': AppRoutes.PROVIDERS,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
   ];
 
   @override
