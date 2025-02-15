@@ -5,6 +5,7 @@ import 'package:teck_app/app/database/models/products_model.dart';
 import 'models/categories_model.dart';
 import 'models/clients_model.dart';
 import 'models/payment_method_model.dart';
+import 'models/providers_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -411,6 +412,63 @@ class DatabaseHelper {
 
     if (maps.isNotEmpty) {
       return Client.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Providers
+  // Insert provider
+  Future<int> insertProvider(Provider provider) async {
+    final db = await database;
+    return await db.insert('providers', provider.toMap());
+  }
+
+  // Get all providers
+  Future<List<Provider>> getProviders() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('providers');
+
+    return List.generate(maps.length, (i) {
+      return Provider.fromMap(maps[i]);
+    });
+  }
+
+  // Update provider
+  Future<int> updateProvider(Provider provider) async {
+    final db = await database;
+    return await db.update(
+      'providers',
+      provider.toMap(),
+      where: 'id = ?',
+      whereArgs: [provider.id],
+    );
+  }
+
+  Future<int> desactiveProvider(Provider provider) async {
+    final db = await database;
+    provider.updatedAt = DateTime.now();
+
+    return await db.update(
+      'providers',
+      provider.toMap(),
+      where: 'id = ?',
+      whereArgs: [provider.id],
+    );
+  }
+
+  // Get provider by ID
+  Future<Provider?> getProviderById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'providers',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Provider.fromMap(maps.first);
     } else {
       return null;
     }

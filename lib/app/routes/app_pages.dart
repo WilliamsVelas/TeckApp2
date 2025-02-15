@@ -11,6 +11,8 @@ import 'package:teck_app/app/modules/payment_method/bindings/payment_method_bind
 import 'package:teck_app/app/modules/payment_method/views/payment_method_view.dart';
 import 'package:teck_app/app/modules/products/bindings/product_binding.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
+import 'package:teck_app/app/modules/providers/bindings/provider_binding.dart';
+import 'package:teck_app/app/modules/providers/views/provier_view.dart';
 import 'package:teck_app/app/routes/app_routes.dart';
 
 class AppPages {
@@ -46,6 +48,12 @@ class AppPages {
       name: AppRoutes.CLIENTS,
       page: () => ClientView(),
       binding: ClientBinding(),
+    ),
+    //Providers view
+    GetPage(
+      name: AppRoutes.PROVIDERS,
+      page: () => ProviderView(),
+      binding: ProviderBinding(),
     ),
   ];
 }
