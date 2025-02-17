@@ -95,13 +95,4 @@ class ClientsController extends GetxController{
 
     clients.value = filtered;
   }
-
-  Future<void> desactiveClient(Client client) async {
-    try {
-      await dbHelper.desactiveClient(client);
-      fetchAllClients(); // Refresh the list after deactivation
-    } catch (e) {
-      print('Error al desactivar el cliente: $e');
-    }
-  }
 }

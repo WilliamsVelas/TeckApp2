@@ -85,13 +85,4 @@ class ProviderController extends GetxController{
 
     providers.value = filtered;
   }
-
-  Future<void> desactiveProvider(Provider provider) async {
-    try {
-      await dbHelper.desactiveProvider(provider);
-      fetchAllProviders();
-    } catch (e) {
-      print('Error al desactivar el proveedor: $e');
-    }
-  }
 }

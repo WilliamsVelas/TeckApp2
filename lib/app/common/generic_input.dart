@@ -85,4 +85,52 @@ class GenericFormInput extends StatelessWidget {
   }
 }
 
+class CustomDropdown<T> extends StatelessWidget {
+  final String hintText;
+  final T? value;
+  final List<T> items;
+  final String Function(T) itemTextBuilder;
+  final void Function(T?) onChanged;
+  final double maxMenuHeight;
 
+  const CustomDropdown({
+    Key? key,
+    required this.hintText,
+    required this.value,
+    required this.items,
+    required this.itemTextBuilder,
+    required this.onChanged,
+    this.maxMenuHeight = 100,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonFormField<T>(
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hintText,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        isExpanded: true,
+        value: value,
+        items: items
+            .map((item) => DropdownMenuItem<T>(
+          value: item,
+          child: Text(itemTextBuilder(item)),
+        ))
+            .toList(),
+        onChanged: onChanged,
+        dropdownColor: Colors.white,
+        menuMaxHeight: maxMenuHeight,
+      ),
+    );
+  }
+}

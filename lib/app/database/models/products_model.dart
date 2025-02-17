@@ -4,7 +4,6 @@ class Product {
   String code;
   double price;
   double? refPrice;
-  String status;
   int minStock;
   int serialsQty;
   int categoryId;
@@ -18,7 +17,6 @@ class Product {
     required this.code,
     this.price = 0.0,
     this.refPrice,
-    this.status = 'activo',
     this.minStock = 0,
     this.serialsQty = 0,
     this.categoryId = 0,
@@ -34,7 +32,6 @@ class Product {
       'code': code,
       'price': price,
       'refPrice': refPrice,
-      'status': status,
       'minStock': minStock,
       'serialsQty': serialsQty,
       'categoryId': categoryId,
@@ -51,7 +48,6 @@ class Product {
       code: map['code'] as String,
       price: map['price'] as double,
       refPrice: map['refPrice'] as double?,
-      status: map['status'] as String,
       minStock: map['minStock'] as int,
       serialsQty: map['serialsQty'] as int,
       categoryId: map['categoryId'] as int,

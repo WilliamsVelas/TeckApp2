@@ -78,12 +78,4 @@ class PaymentMethodController extends GetxController{
     paymentMethods.value = filtered;
   }
 
-  Future<void> desactivePaymentMethod(PaymentMethod paymentMethod) async {
-    try {
-      await dbHelper.desactivePaymentMethod(paymentMethod);
-      fetchAllPaymentMethods(); // Refresh the list after deactivation
-    } catch (e) {
-      print('Error al desactivar el método de pago: $e');
-    }
-  }
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 import 'package:teck_app/theme/colors.dart';
+
+import '../controllers/product_controller.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -10,6 +14,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ProductController controller = Get.find<ProductController>();
+
     return Card(
       color: product.serialsQty <= product.minStock
           ? AppColors.backgroundMinStock
@@ -23,6 +29,22 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Provider Name
+            FutureBuilder<String>(
+              future: controller.getProviderName(product.providerId),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data!,
+                    style: TextStyle(color: AppColors.principalWhite),
+                  );
+                } else {
+                  return Text('Cargando...',
+                      style: TextStyle(color: AppColors.principalGray));
+                }
+              },
+            ),
+            SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -40,22 +62,26 @@ class ProductCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
+            // Stock actual
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Nombre del provider',
-                  style: TextStyle(color: AppColors.principalWhite),
+                FutureBuilder<String>(
+                  future: controller.getCategoryName(product.categoryId),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        snapshot.data!,
+                        style: TextStyle(color: AppColors.principalWhite),
+                      );
+                    } else {
+                      return Text('Cargando...',
+                          style: TextStyle(color: AppColors.principalGray));
+                    }
+                  },
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
 
-            // Stock actual
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
                 Text(
                   'Stock: ${product.serialsQty}',
                   style: const TextStyle(color: AppColors.principalGray),

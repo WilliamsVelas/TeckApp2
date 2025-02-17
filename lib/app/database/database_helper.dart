@@ -6,6 +6,7 @@ import 'models/categories_model.dart';
 import 'models/clients_model.dart';
 import 'models/payment_method_model.dart';
 import 'models/providers_model.dart';
+import 'models/serials_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -44,7 +45,6 @@ class DatabaseHelper {
       code TEXT,
       price REAL DEFAULT 0.0,
       refPrice REAL,
-      status TEXT DEFAULT 'activo' CHECK (status IN ('activo', 'inactivo', 'vendido', 'afectado')),
       minStock INTEGER,
       imageId INTEGER,
       serialsQty INTEGER,
@@ -136,6 +136,7 @@ class DatabaseHelper {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       productId INTEGER,
       serial TEXT,
+      status TEXT,
       createdAt TEXT,
       updatedAt TEXT
     )
@@ -228,7 +229,6 @@ class DatabaseHelper {
   //Desactive product
   Future<int> desactiveProduct(Product product) async {
     final db = await database;
-    product.status = 'inactivo';
     product.updatedAt = DateTime.now();
 
     return await db.update(
@@ -329,19 +329,6 @@ class DatabaseHelper {
     );
   }
 
-  //Desactive payment method
-  Future<int> desactivePaymentMethod(PaymentMethod paymentMethod) async {
-    final db = await database;
-    paymentMethod.updatedAt = DateTime.now();
-
-    return await db.update(
-      'paymentMethods',
-      paymentMethod.toMap(),
-      where: 'id = ?',
-      whereArgs: [paymentMethod.id],
-    );
-  }
-
   // Get payment method by ID
   Future<PaymentMethod?> getPaymentMethodById(int id) async {
     final db = await database;
@@ -379,19 +366,6 @@ class DatabaseHelper {
   // Update client
   Future<int> updateClient(Client client) async {
     final db = await database;
-    return await db.update(
-      'clients',
-      client.toMap(),
-      where: 'id = ?',
-      whereArgs: [client.id],
-    );
-  }
-
-  //Desactive client (actualiza solo el timestamp)
-  Future<int> desactiveClient(Client client) async {
-    final db = await database;
-    client.updatedAt = DateTime.now();
-
     return await db.update(
       'clients',
       client.toMap(),
@@ -445,18 +419,6 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> desactiveProvider(Provider provider) async {
-    final db = await database;
-    provider.updatedAt = DateTime.now();
-
-    return await db.update(
-      'providers',
-      provider.toMap(),
-      where: 'id = ?',
-      whereArgs: [provider.id],
-    );
-  }
-
   // Get provider by ID
   Future<Provider?> getProviderById(int id) async {
     final db = await database;
@@ -472,5 +434,36 @@ class DatabaseHelper {
     } else {
       return null;
     }
+  }
+
+  // Serials
+  // Get serials by productId
+  Future<List<Serial>> getSerialsByProductId(int productId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'serials',
+      where: 'productId = ?',
+      whereArgs: [productId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Serial.fromMap(maps[i]);
+    });
+  }
+
+  // Insert serial
+  Future<int> insertSerial(Serial serial) async {
+    final db = await database;
+    return await db.insert('serials', serial.toMap());
+  }
+
+  // Delete serial
+  Future<int> deleteSerial(int id) async {
+    final db = await database;
+    return await db.delete(
+      'serials',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

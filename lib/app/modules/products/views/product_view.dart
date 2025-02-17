@@ -112,7 +112,9 @@ class ProductView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButton<String?>(
-                value: controller.selectedStatus.value.isEmpty ? null : controller.selectedStatus.value,
+                value: controller.selectedStatus.value.isEmpty
+                    ? null
+                    : controller.selectedStatus.value,
                 hint: const Text("Seleccionar Estado"),
                 onChanged: (value) {
                   controller.filterByStatus(value);
@@ -123,9 +125,8 @@ class ProductView extends StatelessWidget {
                     value: null,
                     child: Text('Todos los estados'),
                   ),
-                  ...['Activo', 'Inactivo']
-                      .map(
-                        (status) => DropdownMenuItem(
+                  ...['Activo', 'Inactivo'].map(
+                    (status) => DropdownMenuItem(
                       value: status,
                       child: Text(status),
                     ),
@@ -177,24 +178,35 @@ class ProductView extends StatelessWidget {
   }
 
   void _openProductForm(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
+    Get.to(() => ProductFormView());
+  }
+}
+
+class ProductFormView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       backgroundColor: AppColors.onPrincipalBackground,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: 16.0,
-            left: 16.0,
-            right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+      appBar: AppBar(
+        backgroundColor: AppColors.onPrincipalBackground,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.keyboard_arrow_left_outlined,
+            color: AppColors.principalWhite,
           ),
-          child: ProductForm(),
-        );
-      },
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          'Agregar Producto',
+          style: TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            color: AppColors.principalWhite,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      body: ProductForm(),
     );
   }
 }

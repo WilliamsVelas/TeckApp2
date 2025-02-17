@@ -56,6 +56,13 @@ class AllOptionsView extends StatelessWidget {
       'iconColor': AppColors.onPrincipalBackground,
     },
     {
+      'icon': Icons.account_circle,
+      'name': 'Perfil',
+      'route': AppRoutes.PROVIDERS,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
       'icon': Icons.settings,
       'name': 'Configuracion',
       'route': AppRoutes.PROVIDERS,
