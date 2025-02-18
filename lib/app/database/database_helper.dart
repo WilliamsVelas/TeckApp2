@@ -4,6 +4,8 @@ import 'package:teck_app/app/database/models/products_model.dart';
 
 import 'models/categories_model.dart';
 import 'models/clients_model.dart';
+import 'models/invoice_lines_model.dart';
+import 'models/invoices_model.dart';
 import 'models/payment_method_model.dart';
 import 'models/providers_model.dart';
 import 'models/serials_model.dart';
@@ -462,6 +464,82 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(
       'serials',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Invoices
+  // Insert invoice
+  Future<int> insertInvoice(Invoice invoice) async {
+    final db = await database;
+    return await db.insert('invoices', invoice.toMap());
+  }
+
+  // Get all invoices
+  Future<List<Invoice>> getInvoices() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('invoices');
+
+    return List.generate(maps.length, (i) {
+      return Invoice.fromMap(maps[i]);
+    });
+  }
+
+  // Update invoice
+  Future<int> updateInvoice(Invoice invoice) async {
+    final db = await database;
+    return await db.update(
+      'invoices',
+      invoice.toMap(),
+      where: 'id = ?',
+      whereArgs: [invoice.id],
+    );
+  }
+
+  // Get invoice by ID
+  Future<Invoice?> getInvoiceById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'invoices',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Invoice.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // InvoiceLine
+  // Get invoice lines by invoiceId
+  Future<List<InvoiceLine>> getInvoiceLinesByInvoiceId(int invoiceId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'invoiceLine',
+      where: 'invoiceId = ?',
+      whereArgs: [invoiceId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return InvoiceLine.fromMap(maps[i]);
+    });
+  }
+
+  // Insert invoice line
+  Future<int> insertInvoiceLine(InvoiceLine invoiceLine) async {
+    final db = await database;
+    return await db.insert('invoiceLine', invoiceLine.toMap());
+  }
+
+  // Delete invoice line
+  Future<int> deleteInvoiceLine(int id) async {
+    final db = await database;
+    return await db.delete(
+      'invoiceLine',
       where: 'id = ?',
       whereArgs: [id],
     );
