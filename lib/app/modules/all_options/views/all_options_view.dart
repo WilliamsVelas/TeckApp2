@@ -35,6 +35,20 @@ class AllOptionsView extends StatelessWidget {
       'iconColor': AppColors.onPrincipalBackground,
     },
     {
+      'icon': Icons.comment_bank,
+      'name': 'C. Bancos',
+      'route': AppRoutes.PAYMENTMETHOD,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
+      'icon': Icons.receipt,
+      'name': 'Cuentas',
+      'route': AppRoutes.PAYMENTMETHOD,
+      'color': Colors.blue,
+      'iconColor': AppColors.onPrincipalBackground,
+    },
+    {
       'icon': Icons.person_pin_circle_outlined,
       'name': 'Proveedores',
       'route': AppRoutes.PROVIDERS,
