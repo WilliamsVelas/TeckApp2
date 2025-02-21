@@ -120,13 +120,13 @@ class CustomDropdown<T> extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
         isExpanded: true,
-        value: value,
-        items: items
-            .map((item) => DropdownMenuItem<T>(
+        value: value != null && items.contains(value) ? value : null,
+        items: items.isEmpty
+            ? null
+            : items.map((item) => DropdownMenuItem<T>(
           value: item,
           child: Text(itemTextBuilder(item)),
-        ))
-            .toList(),
+        )).toList(),
         onChanged: onChanged,
         dropdownColor: Colors.white,
         menuMaxHeight: maxMenuHeight,

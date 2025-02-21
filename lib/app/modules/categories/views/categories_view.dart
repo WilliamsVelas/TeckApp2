@@ -63,28 +63,43 @@ class CategoriesView extends GetView<CategoriesController> {
                 ),
               ),
               padding: const EdgeInsets.all(16.0),
-              child: Obx(
-                () {
-                  final categories = controller.categories;
-                  if (categories.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No hay categorías disponibles.',
-                        style: TextStyle(fontSize: 16.0, color: Colors.black),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Categorías',
+                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                  ),
+                  Obx(() =>
+                      Text(
+                        '${controller.categories.length} categorías',
+                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
                       ),
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: CategoryCard(category: category),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      final categories = controller.categories;
+                      if (categories.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay categorías disponibles.',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: CategoryCard(category: category),
+                          );
+                        },
                       );
-                    },
-                  );
-                },
+                    }),
+                  ),
+                ],
               ),
             ),
           ),

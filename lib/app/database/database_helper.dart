@@ -167,9 +167,8 @@ class DatabaseHelper {
       totalPayed REAL,
       refTotalAmount REAL,
       refTotalPayed REAL,
-      qty INTEGER
-      clientId INTEGER
-      bankAccountId INTEGER
+      qty INTEGER,
+      clientId INTEGER,
       productId INTEGER,
       createdAt TEXT,
       updatedAt TEXT

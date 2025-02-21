@@ -21,84 +21,109 @@ class InvoiceForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Agregar Factura',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: AppColors.principalWhite,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 24.0),
-
             GenericFormInput(
-              label: 'Nombre de la categoría',
+              label: 'Número del documento',
               keyboardType: TextInputType.text,
               icon: Icons.insert_drive_file,
               onChanged: (value) => invoiceController.documentNo.value = value,
               controller: TextEditingController()..text = invoiceController.documentNo.value,
             ),
             SizedBox(height: 16.0),
-            GenericFormInput(
-              label: 'Tipo',
-              keyboardType: TextInputType.text,
-              icon: Icons.type_specimen,
-              onChanged: (value) => invoiceController.type.value = value,
-              controller: TextEditingController()..text = invoiceController.type.value,
-            ),
-            SizedBox(height: 16.0),
             Obx(
                   () => CustomDropdown<Client>(
                 hintText: 'Cliente',
                 value: invoiceController.selectedClient.value,
-                items:  invoiceController.clients,
-                itemTextBuilder: (clients) => clients.name,
-                onChanged: (client) =>
-                    invoiceController.selectClient(client),
+                items: invoiceController.clients,
+                itemTextBuilder: (client) => client.name,
+                onChanged: (client) => invoiceController.selectClient(client),
               ),
             ),
+            SizedBox(height: 16.0),
             Obx(
                   () => CustomDropdown<Product>(
                 hintText: 'Producto',
                 value: invoiceController.selectedProduct.value,
-                items:  invoiceController.products,
-                itemTextBuilder: (products) => products.name,
-                onChanged: (product) =>
-                    invoiceController.selectProduct(product),
+                items: invoiceController.products,
+                itemTextBuilder: (product) => product.name,
+                onChanged: (product) => invoiceController.selectProduct(product),
               ),
             ),
             SizedBox(height: 16.0),
-            Obx(() {
-              print("Renderizando Dropdown con ${invoiceController.availableSerials.length} seriales");
-              return CustomDropdown<Serial>(
+            Obx(
+                  () => CustomDropdown<Serial>(
                 hintText: 'Seriales',
                 value: invoiceController.selectedSerial.value,
                 items: invoiceController.availableSerials.toList(),
                 itemTextBuilder: (serial) => serial.serial,
                 onChanged: (serial) => invoiceController.selectSerial(serial),
-              );
-            }),
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => invoiceController.addInvoiceLine(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.principalGreen,
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              ),
+              child: Text('Agregar Línea'),
+            ),
             SizedBox(height: 24.0),
 
-            Text("Líneas de Factura", style: TextStyle(fontSize: 18, color: AppColors.principalWhite, fontWeight: FontWeight.bold)),
+            Text(
+              "Productos",
+              style: TextStyle(
+                fontSize: 18,
+                color: AppColors.principalWhite,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(height: 16.0),
-
-            Obx(() => Column(
-              children: invoiceController.invoiceLines.map((invoiceLine) {
-                int index = invoiceController.invoiceLines.indexOf(invoiceLine);
-                return ListTile(
-                  title: Text("${invoiceLine.productName} - ${invoiceLine.total}", style: TextStyle(color: AppColors.principalWhite)),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete, color: AppColors.invalid),
-                    onPressed: () => invoiceController.invoiceLines.removeAt(index),
-                  ),
-                );
-              }).toList(),
-            )),
+            Obx(
+                  () => Column(
+                children: invoiceController.invoiceLines.map((invoiceLine) {
+                  int index = invoiceController.invoiceLines.indexOf(invoiceLine);
+                  return ListTile(
+                    title: Text(
+                      "${invoiceLine.productName} - \$${invoiceLine.total}",
+                      style: TextStyle(color: AppColors.principalWhite),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: AppColors.invalid),
+                      onPressed: () => invoiceController.invoiceLines.removeAt(index),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 16.0),
+            GenericFormInput(
+              label: 'Total Pagado',
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              icon: Icons.money,
+              onChanged: (value) => invoiceController.totalPayed.value = value,
+              controller: TextEditingController()..text = invoiceController.totalPayed.value,
+            ),
+            SizedBox(height: 16.0),
+            Obx(
+                  () => Text(
+                'Monto Total: \$${invoiceController.calculateTotalAmount()}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.principalWhite,
+                ),
+              ),
+            ),
+            Obx(
+                  () => Text(
+                'Monto Pendiente: \$${invoiceController.calculateAmount()}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.principalWhite,
+                ),
+              ),
+            ),
             SizedBox(height: 32.0),
 
-            // Botones de acción
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -122,7 +147,6 @@ class InvoiceForm extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 24.0),
           ],
         ),
       ),

@@ -8,39 +8,27 @@ import '../../../database/models/products_model.dart';
 import '../../../database/models/serials_model.dart';
 
 class InvoiceController extends GetxController {
-  // Lista de facturas
   final RxList<Invoice> invoices = <Invoice>[].obs;
-
-  // Búsqueda y ordenamiento
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
   final RxList<Invoice> originalInvoices = <Invoice>[].obs;
 
-  // Líneas de factura
   final RxList<InvoiceLine> invoiceLines = <InvoiceLine>[].obs;
 
-  // Producto seleccionado
   final Rx<Product?> selectedProduct = Rx<Product?>(null);
   final RxList<Product> products = <Product>[].obs;
 
-  // Seriales disponibles para el producto seleccionado
   final RxList<Serial> availableSerials = <Serial>[].obs;
-
-  // Serial seleccionado para la factura
   final Rx<Serial?> selectedSerial = Rx<Serial?>(null);
 
   final RxList<Client> clients = <Client>[].obs;
   final Rx<Client?> selectedClient = Rx<Client?>(null);
-  // Campos del formulario de factura
-  final RxString documentNo = ''.obs;
-  final RxString type = ''.obs;
-  final RxString totalAmount = ''.obs;
-  final RxString totalPayed = ''.obs;
-  final RxInt qty = 0.obs;
-  final RxInt clientId = 0.obs;
-  final RxInt bankAccountId = 0.obs;
 
-  // DAO
+  final RxString documentNo = ''.obs;
+  final RxString totalPayed = ''.obs;
+  final RxString type = ''.obs;
+  final RxInt qty = 0.obs;
+
   final DatabaseHelper dbHelper = DatabaseHelper();
 
   @override
@@ -48,83 +36,135 @@ class InvoiceController extends GetxController {
     super.onInit();
     fetchAllProducts();
     fetchAllInvoices();
+    fetchAllClients();
+  }
+
+  void fetchAll() {
+    fetchAllProducts();
+    fetchAllClients();
+  }
+
+  void fetchAllClients() async {
+    clients.clear();
+    final List<Client> allClients = await dbHelper.getClients();
+    clients.assignAll(allClients);
+  }
+
+  Future<String> getClientName(int clientId) async {
+    Client? client = await dbHelper.getClientById(clientId);
+    return client?.businessName ?? 'N/A';
   }
 
   void selectProduct(Product? product) async {
     selectedProduct.value = product;
     availableSerials.clear();
     selectedSerial.value = null;
-    print("producto seleccionado: ${product?.id}");
-
     if (product != null) {
-      print("producto seleccionado: ${product?.id}");
-      final List<Serial> serials = await dbHelper.getSerialsByProductId(product.id!);
-      print("seriales: $serials");
-
+      final List<Serial> serials =
+          await dbHelper.getSerialsByProductId(product.id!);
       availableSerials.assignAll(serials);
-      availableSerials.refresh();
     }
   }
 
-  void selectClient(Client? client) async {
+  void selectClient(Client? client) {
     selectedClient.value = client;
   }
 
   void fetchAllProducts() async {
+    products.clear();
     final List<Product> allProducts = await dbHelper.getProducts();
     products.assignAll(allProducts);
   }
 
-  // Seleccionar un serial
   void selectSerial(Serial? serial) {
     selectedSerial.value = serial;
   }
 
-  // Guardar la factura
-  Future<void> saveInvoice() async {
-    // Validar que haya un producto y un serial seleccionados
+  void addInvoiceLine() {
     if (selectedProduct.value == null || selectedSerial.value == null) {
       Get.snackbar('Error', 'Debe seleccionar un producto y un serial.');
       return;
     }
 
-    // Validar campos numéricos
-    final parsedTotalAmount = double.tryParse(totalAmount.value) ?? 0.0;
-    final parsedTotalPayed = double.tryParse(totalPayed.value) ?? 0.0;
+    final invoiceLine = InvoiceLine(
+      productName: selectedProduct.value!.name,
+      productPrice: selectedProduct.value!.price,
+      refProductPrice: selectedProduct.value!.price,
+      total: selectedProduct.value!.price,
+      productId: selectedProduct.value!.id!,
+      productSerial: selectedSerial.value!.serial,
+      invoiceId: 0,
+      createdAt: DateTime.now(),
+    );
 
-    // Crear la factura
+    invoiceLines.add(invoiceLine);
+    qty.value += 1;
+    selectedProduct.value = null;
+    selectedSerial.value = null;
+    availableSerials.clear();
+  }
+
+  double calculateTotalAmount() {
+    return invoiceLines.fold(0.0, (sum, line) => sum + line.total);
+  }
+
+  double calculateAmount() {
+    final totalAmount = calculateTotalAmount();
+    final parsedTotalPayed = double.tryParse(totalPayed.value) ?? 0.0;
+    return totalAmount - parsedTotalPayed;
+  }
+
+  Future<void> saveInvoice() async {
+    if (invoiceLines.isEmpty) {
+      Get.snackbar('Error', 'Debe agregar al menos una línea de factura.');
+      return;
+    }
+    if (selectedClient.value == null) {
+      Get.snackbar('Error', 'Debe seleccionar un cliente.');
+      return;
+    }
+    if (documentNo.value.isEmpty) {
+      Get.snackbar('Error', 'El número de documento es obligatorio.');
+      return;
+    }
+
+    final parsedTotalPayed = double.tryParse(totalPayed.value) ?? 0.0;
+    final totalAmount = calculateTotalAmount();
+
+    if (parsedTotalPayed == totalAmount) {
+      type.value = "INV_P";
+    } else {
+      type.value = "INV_N_P";
+    }
+
     final invoice = Invoice(
       documentNo: documentNo.value,
       type: type.value,
-      totalAmount: parsedTotalAmount,
+      totalAmount: totalAmount,
       totalPayed: parsedTotalPayed,
-      refTotalAmount: parsedTotalAmount,
+      refTotalAmount: totalAmount,
       refTotalPayed: parsedTotalPayed,
       qty: qty.value,
-      clientId: clientId.value,
-      bankAccountId: bankAccountId.value,
-      productId: selectedProduct.value!.id!,
+      clientId: selectedClient.value!.id!,
       createdAt: DateTime.now(),
     );
 
     try {
-      // Guardar la factura en la base de datos
       final invoiceId = await dbHelper.insertInvoice(invoice);
-
-      // Crear la línea de factura (InvoiceLine)
-      final invoiceLine = InvoiceLine(
-        productName: selectedProduct.value!.name,
-        productPrice: selectedProduct.value!.price,
-        refProductPrice: selectedProduct.value!.price,
-        total: selectedProduct.value!.price * qty.value,
-        productId: selectedProduct.value!.id!,
-        productSerial: selectedSerial.value!.serial,
-        invoiceId: invoiceId,
-        createdAt: DateTime.now(),
-      );
-
-      // Guardar la línea de factura en la base de datos
-      await dbHelper.insertInvoiceLine(invoiceLine);
+      for (var line in invoiceLines) {
+        final updatedLine = InvoiceLine(
+          productName: line.productName,
+          productPrice: line.productPrice,
+          refProductPrice: line.refProductPrice,
+          total: line.total,
+          refTotal: line.refTotal,
+          productId: line.productId,
+          productSerial: line.productSerial,
+          invoiceId: invoiceId,
+          createdAt: line.createdAt,
+        );
+        await dbHelper.insertInvoiceLine(updatedLine);
+      }
 
       Get.snackbar('Éxito', 'Factura guardada correctamente');
       fetchAllInvoices();
@@ -135,46 +175,41 @@ class InvoiceController extends GetxController {
     }
   }
 
-  // Limpiar campos del formulario
   void clearFields() {
     documentNo.value = '';
     type.value = '';
-    totalAmount.value = '';
     totalPayed.value = '';
     qty.value = 0;
-    clientId.value = 0;
-    bankAccountId.value = 0;
+    selectedClient.value = null;
     selectedProduct.value = null;
     selectedSerial.value = null;
+    invoiceLines.clear();
     availableSerials.clear();
   }
 
-  // Obtener todas las facturas
   void fetchAllInvoices() async {
     final List<Invoice> allInvoices = await dbHelper.getInvoices();
     invoices.assignAll(allInvoices);
     originalInvoices.assignAll(allInvoices);
   }
 
-  // Buscar facturas
   void searchInvoices(String query) {
     searchQuery.value = query;
     applyFilters();
   }
 
-  // Ordenar facturas
   void sortInvoices(String criteria) {
     sortCriteria.value = criteria;
     applyFilters();
   }
 
-  // Aplicar filtros y ordenamiento
   void applyFilters() {
     final filtered = originalInvoices.where((invoice) {
       final matchesSearch = searchQuery.isEmpty ||
-          invoice.documentNo.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          invoice.documentNo
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
           invoice.type.toLowerCase().contains(searchQuery.value.toLowerCase());
-
       return matchesSearch;
     }).toList();
 

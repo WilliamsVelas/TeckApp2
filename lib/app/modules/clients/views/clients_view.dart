@@ -60,29 +60,46 @@ class ClientView extends GetView<ClientsController> {
                 ),
               ),
               padding: const EdgeInsets.all(16.0),
-              child: Obx(() {
-                final clients = controller.clients;
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Clientes',
+                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                  ),
+                  Obx(() =>
+                      Text(
+                        '${controller.clients.length} clientes',
+                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
+                      ),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      final clients = controller.clients;
 
-                if (clients.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No hay clientes disponibles.',
-                      style: TextStyle(fontSize: 16.0, color: Colors.black),
-                    ),
-                  );
-                }
+                      if (clients.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay clientes disponibles.',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                          ),
+                        );
+                      }
 
-                return ListView.builder(
-                  itemCount: clients.length,
-                  itemBuilder: (context, index) {
-                    final client = clients[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: ClientCard(client: client),
-                    );
-                  },
-                );
-              }),
+                      return ListView.builder(
+                        itemCount: clients.length,
+                        itemBuilder: (context, index) {
+                          final client = clients[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: ClientCard(client: client),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 16),

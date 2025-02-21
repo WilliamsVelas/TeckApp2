@@ -78,9 +78,7 @@ class ProductForm extends StatelessWidget {
                     productController.selectProvider(provider),
               ),
             ),
-
             SizedBox(height: 24.0),
-
             Row(
               children: [
                 Expanded(

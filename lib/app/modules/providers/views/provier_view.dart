@@ -63,29 +63,46 @@ class ProviderView extends GetView<ProviderController> {
                 ),
               ),
               padding: const EdgeInsets.all(16.0),
-              child: Obx(() {
-                final providers = controller.providers;
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Proveedores',
+                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                  ),
+                  Obx(() =>
+                      Text(
+                        '${controller.providers.length} proveedores',
+                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
+                      ),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      final providers = controller.providers;
 
-                if (providers.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No hay proveedores disponibles.',
-                      style: TextStyle(fontSize: 16.0, color: Colors.black),
-                    ),
-                  );
-                }
+                      if (providers.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay proveedores disponibles.',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                          ),
+                        );
+                      }
 
-                return ListView.builder(
-                  itemCount: providers.length,
-                  itemBuilder: (context, index) {
-                    final provider = providers[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: ProviderCard(provider: provider),
-                    );
-                  },
-                );
-              }),
+                      return ListView.builder(
+                        itemCount: providers.length,
+                        itemBuilder: (context, index) {
+                          final provider = providers[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: ProviderCard(provider: provider),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 16),

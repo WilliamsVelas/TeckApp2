@@ -47,6 +47,11 @@ class ProductController extends GetxController {
     fetchAllProviders();
   }
 
+  void fetchAll(){
+    fetchAllCategories();
+    fetchAllProviders();
+  }
+
   Future<String> getCategoryName(int categoryId) async {
     Category? category = await dbHelper.getCategoryById(categoryId);
     return category?.name ?? 'N/A';

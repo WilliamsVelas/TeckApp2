@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../database/models/invoices_model.dart';
+import '../controllers/invoice_controller.dart';
 
 class InvoiceCard extends StatelessWidget {
   final Invoice invoice;
@@ -11,6 +14,8 @@ class InvoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final InvoiceController controller = Get.find<InvoiceController>(); // Get the controller
+
     return Card(
       color: AppColors.onPrincipalBackground,
       elevation: 3,
@@ -26,7 +31,7 @@ class InvoiceCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  invoice.qty.toString(),
+                  invoice.documentNo,
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -40,26 +45,19 @@ class InvoiceCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Nombre del provider',
-                  style: TextStyle(color: AppColors.principalWhite),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // Stock actual
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Stock: ${invoice.refTotalAmount}',
-                  style: const TextStyle(color: AppColors.principalGray),
-                ),
-              ],
+            // Client Name
+            FutureBuilder<String>(
+              future: controller.getClientName(invoice.clientId),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data!,
+                    style: TextStyle(color: AppColors.principalWhite),
+                  );
+                } else {
+                  return Text('Cargando...', style: TextStyle(color: AppColors.principalGray));
+                }
+              },
             ),
           ],
         ),

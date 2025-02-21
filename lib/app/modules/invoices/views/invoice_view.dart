@@ -24,7 +24,7 @@ class InvoiceView extends StatelessWidget {
               children: [
                 Expanded(
                   child: GenericInput(
-                    hintText: 'Buscar factura...',
+                    hintText: 'Buscar venta...',
                     onChanged: (value) {
                       controller.searchInvoices(value);
                     },
@@ -52,29 +52,46 @@ class InvoiceView extends StatelessWidget {
                 ),
               ),
               padding: const EdgeInsets.all(16.0),
-              child: Obx(() {
-                final invoices = controller.invoices;
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ventas',
+                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                  ),
+                  Obx(() =>
+                      Text(
+                        '${controller.invoices.length} ventas',
+                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
+                      ),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      final invoices = controller.invoices;
 
-                if (invoices.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No hay facturas disponibles.',
-                      style: TextStyle(fontSize: 16.0, color: Colors.black),
-                    ),
-                  );
-                }
+                      if (invoices.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay ventas disponibles.',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                          ),
+                        );
+                      }
 
-                return ListView.builder(
-                  itemCount: invoices.length,
-                  itemBuilder: (context, index) {
-                    final invoice = invoices[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: InvoiceCard(invoice: invoice),
-                    );
-                  },
-                );
-              }),
+                      return ListView.builder(
+                        itemCount: invoices.length,
+                        itemBuilder: (context, index) {
+                          final invoice = invoices[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: InvoiceCard(invoice: invoice),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 16),
@@ -82,6 +99,7 @@ class InvoiceView extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.9,
             child: ElevatedButton(
               onPressed: () {
+                controller.fetchAll();
                 _openInvoiceForm(context);
               },
               style: ElevatedButton.styleFrom(
@@ -143,6 +161,7 @@ class InvoiceView extends StatelessWidget {
 }
 
 class InvoiceFormView extends StatelessWidget {
+  final InvoiceController controller = Get.find<InvoiceController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,7 +173,10 @@ class InvoiceFormView extends StatelessWidget {
             Icons.keyboard_arrow_left_outlined,
             color: AppColors.principalWhite,
           ),
-          onPressed: () => Get.back(),
+          onPressed: (){
+            controller.clearFields();
+            Get.back();
+          },
         ),
         title: const Text(
           'Agregar Venta',

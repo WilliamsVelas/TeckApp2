@@ -81,7 +81,6 @@ class ProductCard extends StatelessWidget {
                     }
                   },
                 ),
-
                 Text(
                   'Stock: ${product.serialsQty}',
                   style: const TextStyle(color: AppColors.principalGray),

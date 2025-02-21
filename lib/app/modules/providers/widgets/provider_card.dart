@@ -29,10 +29,10 @@ class ProviderCard extends StatelessWidget {
                   color: AppColors.principalGray,
                   size: 20,
                 ),
-                SizedBox(width: 8), // Espacio entre el icono y el nombre del negocio
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    provider.businessName,
+                    provider.value,
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.principalGray,
@@ -43,7 +43,7 @@ class ProviderCard extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              provider.value,
+              provider.businessName,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

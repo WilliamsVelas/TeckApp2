@@ -63,28 +63,43 @@ class PaymentMethodView extends GetView<PaymentMethodController> {
                 ),
               ),
               padding: const EdgeInsets.all(16.0),
-              child: Obx(
-                    () {
-                  final paymentMethods = controller.paymentMethods;
-                  if (paymentMethods.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No hay metodos de pago disponibles.',
-                        style: TextStyle(fontSize: 16.0, color: Colors.black),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Métodos de Pago',
+                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                  ),
+                  Obx(() =>
+                      Text(
+                        '${controller.paymentMethods.length} métodos de pago',
+                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
                       ),
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: paymentMethods.length,
-                    itemBuilder: (context, index) {
-                      final paymentMethod = paymentMethods[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: PaymentMethodCard(paymentMethod: paymentMethod),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      final paymentMethods = controller.paymentMethods;
+                      if (paymentMethods.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No hay métodos de pago disponibles.',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        itemCount: paymentMethods.length,
+                        itemBuilder: (context, index) {
+                          final paymentMethod = paymentMethods[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: PaymentMethodCard(paymentMethod: paymentMethod),
+                          );
+                        },
                       );
-                    },
-                  );
-                },
+                    }),
+                  ),
+                ],
               ),
             ),
           ),

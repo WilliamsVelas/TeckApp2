@@ -23,7 +23,7 @@ class ClientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Icon(
                   Icons.person,
@@ -31,14 +31,14 @@ class ClientCard extends StatelessWidget {
                   size: 20,
                 ),
                 Text(
-                  '${client.affiliateCode}',
+                  ' (${client.codeBank})-',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.principalGray,
                   ),
                 ),
                 Text(
-                  '${client.codeBank}',
+                  '${client.bankAccount}',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.principalGray,
@@ -47,14 +47,26 @@ class ClientCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 4),
-            Text(
-              '${client.name} ${client.lastName}',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.principalWhite,
-              ),
-            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${client.name}${client.lastName}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.principalWhite,
+                  ),
+                ),
+                Text(
+                  '${client.affiliateCode}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.principalGray,
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),
