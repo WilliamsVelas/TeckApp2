@@ -5,6 +5,7 @@ class Serial {
   String status;
   DateTime createdAt;
   DateTime? updatedAt;
+  bool isActive;
 
   Serial({
     this.id,
@@ -13,6 +14,7 @@ class Serial {
     this.status = 'activo',
     required this.createdAt,
     this.updatedAt,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class Serial {
       'status': status,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -36,6 +39,7 @@ class Serial {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
+      isActive: map['isActive'] == 1,
     );
   }
 }

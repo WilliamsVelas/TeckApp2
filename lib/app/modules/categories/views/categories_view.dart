@@ -49,6 +49,12 @@ class CategoriesView extends GetView<CategoriesController> {
                     _showSortDialog(context, controller);
                   },
                 ),
+                // IconButton(
+                //   icon: const Icon(Icons.filter_alt),
+                //   onPressed: () {
+                //     _showFiltersDialog(context, controller);
+                //   },
+                // ),
               ],
             ),
           ),
@@ -68,13 +74,20 @@ class CategoriesView extends GetView<CategoriesController> {
                 children: [
                   Text(
                     'Categorías',
-                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: AppColors.principalWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  Obx(() =>
-                      Text(
-                        '${controller.categories.length} categorías',
-                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
+                  Obx(
+                        () => Text(
+                      '${controller.categories.length} categorías',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.principalGray,
                       ),
+                    ),
                   ),
                   Expanded(
                     child: Obx(() {
@@ -163,6 +176,30 @@ class CategoriesView extends GetView<CategoriesController> {
       },
     );
   }
+
+  // void _showFiltersDialog(BuildContext context, CategoriesController controller) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: const Text('Filtrar categorías'),
+  //         content: Obx(
+  //               () => SwitchListTile(
+  //             title: const Text('Mostrar inactivas'),
+  //             value: controller.showInactive.value,
+  //             onChanged: (value) => controller.toggleShowInactive(value),
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: const Text('Cerrar'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void _openCategoryForm(BuildContext context) {
     showModalBottomSheet(

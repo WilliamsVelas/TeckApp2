@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/providers_model.dart';
 
-class ProviderController extends GetxController{
+class ProviderController extends GetxController {
   final RxList<Provider> providers = <Provider>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs; // Nuevo: Mostrar proveedores desactivados
 
   final RxList<Provider> originalProviders = <Provider>[].obs;
 
-  //Provider
+  // Provider
   final RxString name = ''.obs;
   final RxString lastName = ''.obs;
   final RxString businessName = ''.obs;
@@ -42,6 +43,23 @@ class ProviderController extends GetxController{
     }
   }
 
+  Future<void> deactivateProvider(int providerId) async {
+    try {
+      final provider = await dbHelper.getProviderById(providerId);
+      if (provider != null) {
+        provider.isActive = false;
+        provider.updatedAt = DateTime.now();
+        await dbHelper.updateProvider(provider);
+        fetchAllProviders();
+        print('Proveedor desactivado con ID: $providerId');
+      } else {
+        print('Proveedor con ID $providerId no encontrado');
+      }
+    } catch (e) {
+      print('Error al desactivar el proveedor: $e');
+    }
+  }
+
   void clearFields() {
     name.value = '';
     lastName.value = '';
@@ -51,8 +69,14 @@ class ProviderController extends GetxController{
 
   void fetchAllProviders() async {
     final List<Provider> allProviders = await dbHelper.getProviders();
-    providers.assignAll(allProviders);
-    originalProviders.assignAll(allProviders);
+    providers.assignAll(allProviders.where((prov) => prov.isActive)); // Solo activos por defecto
+    originalProviders.assignAll(allProviders); // Todos, incluidos inactivos
+    applyFilters();
+  }
+
+  void toggleShowInactive(bool value) {
+    showInactive.value = value;
+    applyFilters();
   }
 
   void searchProviders(String query) {
@@ -66,13 +90,15 @@ class ProviderController extends GetxController{
   }
 
   void applyFilters() {
-    final filtered = originalProviders.where((provider) {
+    var filtered = originalProviders.where((provider) {
       final matchesSearch = searchQuery.isEmpty ||
           (provider.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
           (provider.lastName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
           (provider.businessName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
 
-      return matchesSearch;
+      final matchesStatus = showInactive.value || provider.isActive;
+
+      return matchesSearch && matchesStatus;
     }).toList();
 
     if (sortCriteria.value == 'date') {

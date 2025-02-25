@@ -15,79 +15,120 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
+    RxBool isExpanded = false.obs; // Estado para controlar expansión
 
-    return Card(
-      color: product.serialsQty <= product.minStock
-          ? AppColors.backgroundMinStock
-          : AppColors.onPrincipalBackground,
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Provider Name
-            FutureBuilder<String>(
-              future: controller.getProviderName(product.providerId),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Text(
-                    snapshot.data!,
-                    style: TextStyle(color: AppColors.principalWhite),
-                  );
-                } else {
-                  return Text('Cargando...',
-                      style: TextStyle(color: AppColors.principalGray));
-                }
-              },
-            ),
-            SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Obx(
+          () => GestureDetector(
+        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+        child: Card(
+          color: product.serialsQty <= product.minStock
+              ? AppColors.backgroundMinStock
+              : AppColors.onPrincipalBackground,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  product.name,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.principalWhite),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Provider Name
+                    FutureBuilder<String>(
+                      future: controller.getProviderName(product.providerId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!,
+                            style: TextStyle(color: AppColors.principalWhite),
+                          );
+                        } else {
+                          return Text('Cargando...',
+                              style: TextStyle(color: AppColors.principalGray));
+                        }
+                      },
+                    ),
+                    Text(
+                      product.isActive ? 'Activo' : 'Inactivo', // Mostrar estado
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: product.isActive ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: TextStyle(
-                      color: Colors.green, fontWeight: FontWeight.bold),
+                SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      product.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.principalWhite,
+                      ),
+                    ),
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
+                SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    FutureBuilder<String>(
+                      future: controller.getCategoryName(product.categoryId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!,
+                            style: TextStyle(color: AppColors.principalWhite),
+                          );
+                        } else {
+                          return Text('Cargando...',
+                              style: TextStyle(color: AppColors.principalGray));
+                        }
+                      },
+                    ),
+                    Text(
+                      'Stock: ${product.serialsQty}',
+                      style: const TextStyle(color: AppColors.principalGray),
+                    ),
+                  ],
+                ),
+                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: product.isActive
+                              ? () {
+                            controller.deactivateProduct(product.id!);
+                            isExpanded.value = false; // Contraer al desactivar
+                          }
+                              : null, // Deshabilitar si ya está inactivo
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
-            SizedBox(height: 4),
-            // Stock actual
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FutureBuilder<String>(
-                  future: controller.getCategoryName(product.categoryId),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(
-                        snapshot.data!,
-                        style: TextStyle(color: AppColors.principalWhite),
-                      );
-                    } else {
-                      return Text('Cargando...',
-                          style: TextStyle(color: AppColors.principalGray));
-                    }
-                  },
-                ),
-                Text(
-                  'Stock: ${product.serialsQty}',
-                  style: const TextStyle(color: AppColors.principalGray),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

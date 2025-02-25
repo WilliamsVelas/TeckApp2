@@ -21,6 +21,8 @@ class ProductForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+
+
             GenericFormInput(
               label: 'Nombre del producto',
               keyboardType: TextInputType.text,
@@ -170,3 +172,4 @@ class ProductForm extends StatelessWidget {
     );
   }
 }
+

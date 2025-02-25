@@ -13,6 +13,7 @@ class ProductController extends GetxController {
   final RxString selectedStatus = ''.obs;
   final RxInt selectedProviderId = 0.obs;
   final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs;
 
   final RxList<Product> originalProducts = <Product>[].obs;
 
@@ -26,7 +27,7 @@ class ProductController extends GetxController {
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
   final Rx<Provider?> selectedProvider = Rx<Provider?>(null);
 
-  //Product
+  // Product
   final RxString name = ''.obs;
   final RxString code = ''.obs;
   final RxString price = ''.obs;
@@ -43,11 +44,9 @@ class ProductController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAllProducts();
-    fetchAllCategories();
-    fetchAllProviders();
   }
 
-  void fetchAll(){
+  void fetchAll() {
     fetchAllCategories();
     fetchAllProviders();
   }
@@ -74,10 +73,12 @@ class ProductController extends GetxController {
 
   void selectCategory(Category? category) {
     selectedCategory.value = category;
+    categoryId.value = category?.id ?? 0;
   }
 
   void selectProvider(Provider? provider) {
     selectedProvider.value = provider;
+    providerId.value = provider?.id ?? 0;
   }
 
   void addSerial() {
@@ -94,9 +95,11 @@ class ProductController extends GetxController {
 
   Future<void> saveProduct() async {
     if (selectedCategory.value == null) {
+      print('Categoría no seleccionada');
       return;
     }
     if (selectedProvider.value == null) {
+      print('Proveedor no seleccionado');
       return;
     }
     double parsedPrice = 0.0;
@@ -142,10 +145,26 @@ class ProductController extends GetxController {
       print('Seriales guardados para el producto $productId');
 
       fetchAllProducts();
-      clearFields();
       Get.back();
     } catch (e) {
       print('Error al guardar el producto y/o los seriales: $e');
+    }
+  }
+
+  Future<void> deactivateProduct(int productId) async {
+    try {
+      final product = await dbHelper.getProductById(productId);
+      if (product != null) {
+        product.isActive = false;
+        product.updatedAt = DateTime.now();
+        await dbHelper.updateProduct(product);
+        fetchAllProducts();
+        print('Producto desactivado con ID: $productId');
+      } else {
+        print('Producto con ID $productId no encontrado');
+      }
+    } catch (e) {
+      print('Error al desactivar el producto: $e');
     }
   }
 
@@ -155,14 +174,26 @@ class ProductController extends GetxController {
     price.value = '';
     minStock.value = '';
     providerId.value = 0;
+    categoryId.value = 0;
     serials.clear();
+    categories.clear();
+    providers.clear();
     newSerial.value = '';
+    selectedCategory.value = null;
+    selectedProvider.value = null;
+    newSerialController.clear();
   }
 
-  void fetchAllProducts() async {
+  void toggleShowInactive(bool value) {
+    showInactive.value = value;
+    applyFilters();
+  }
+
+  Future<void> fetchAllProducts() async {
     final List<Product> allProducts = await dbHelper.getProducts();
-    products.assignAll(allProducts);
-    originalProducts.assignAll(allProducts);
+    products.assignAll(allProducts.where((prod) => prod.isActive)); // Solo activos por defecto
+    originalProducts.assignAll(allProducts); // Todos, incluidos inactivos
+    applyFilters();
   }
 
   void searchProducts(String query) {
@@ -188,18 +219,14 @@ class ProductController extends GetxController {
   void applyFilters() {
     final filtered = originalProducts.where((product) {
       final matchesSearch = searchQuery.isEmpty ||
-          product.name
-              .toLowerCase()
-              .contains(searchQuery.value.toLowerCase()) ||
-          (product.code
-                  ?.toLowerCase()
-                  .contains(searchQuery.value.toLowerCase()) ??
-              false);
+          product.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          (product.code?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
 
-      final matchesProvider = selectedProviderId.value == 0 ||
-          product.providerId == selectedProviderId.value;
+      final matchesProvider = selectedProviderId.value == 0 || product.providerId == selectedProviderId.value;
 
-      return matchesSearch && matchesProvider;
+      final matchesStatus = showInactive.value || product.isActive;
+
+      return matchesSearch && matchesProvider && matchesStatus;
     }).toList();
 
     if (sortCriteria.value == 'date') {

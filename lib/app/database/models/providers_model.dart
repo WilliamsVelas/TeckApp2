@@ -6,6 +6,7 @@ class Provider {
   String value;
   DateTime createdAt;
   DateTime? updatedAt;
+  bool isActive;
 
   Provider({
     this.id,
@@ -15,6 +16,7 @@ class Provider {
     required this.value,
     required this.createdAt,
     this.updatedAt,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +28,7 @@ class Provider {
       'value': value,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -40,6 +43,7 @@ class Provider {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
+      isActive: map['isActive'] == 1,
     );
   }
 }

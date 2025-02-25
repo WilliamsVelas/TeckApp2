@@ -4,6 +4,7 @@ class Category {
   String? code;
   DateTime createdAt;
   DateTime? updatedAt;
+  bool isActive;
 
   Category({
     this.id,
@@ -11,6 +12,7 @@ class Category {
     this.code,
     required this.createdAt,
     this.updatedAt,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Category {
       'code': code,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -32,6 +35,7 @@ class Category {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
+      isActive: map['isActive'] == 1,
     );
   }
 }

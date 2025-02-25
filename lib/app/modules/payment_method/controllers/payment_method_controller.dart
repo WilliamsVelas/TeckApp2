@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/payment_method_model.dart';
 
-class PaymentMethodController extends GetxController{
+class PaymentMethodController extends GetxController {
   final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs; // Nuevo: Mostrar métodos desactivados
 
   final RxList<PaymentMethod> originalPaymentMethods = <PaymentMethod>[].obs;
 
-  //PaymentMethod
+  // PaymentMethod
   final RxString name = ''.obs;
   final RxString code = ''.obs;
 
@@ -39,6 +40,23 @@ class PaymentMethodController extends GetxController{
     }
   }
 
+  Future<void> deactivatePaymentMethod(int paymentMethodId) async {
+    try {
+      final paymentMethod = await dbHelper.getPaymentMethodById(paymentMethodId);
+      if (paymentMethod != null) {
+        paymentMethod.isActive = false;
+        paymentMethod.updatedAt = DateTime.now();
+        await dbHelper.updatePaymentMethod(paymentMethod);
+        fetchAllPaymentMethods();
+        print('Método de pago desactivado con ID: $paymentMethodId');
+      } else {
+        print('Método de pago con ID $paymentMethodId no encontrado');
+      }
+    } catch (e) {
+      print('Error al desactivar el método de pago: $e');
+    }
+  }
+
   void clearFields() {
     name.value = '';
     code.value = '';
@@ -46,8 +64,14 @@ class PaymentMethodController extends GetxController{
 
   void fetchAllPaymentMethods() async {
     final List<PaymentMethod> allPaymentMethods = await dbHelper.getPaymentMethods();
-    paymentMethods.assignAll(allPaymentMethods);
-    originalPaymentMethods.assignAll(allPaymentMethods);
+    paymentMethods.assignAll(allPaymentMethods.where((pm) => pm.isActive)); // Solo activas por defecto
+    originalPaymentMethods.assignAll(allPaymentMethods); // Todas, incluidas inactivas
+    applyFilters();
+  }
+
+  void toggleShowInactive(bool value) {
+    showInactive.value = value;
+    applyFilters();
   }
 
   void searchPaymentMethods(String query) {
@@ -61,12 +85,14 @@ class PaymentMethodController extends GetxController{
   }
 
   void applyFilters() {
-    final filtered = originalPaymentMethods.where((paymentMethod) {
+    var filtered = originalPaymentMethods.where((paymentMethod) {
       final matchesSearch = searchQuery.isEmpty ||
           paymentMethod.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           paymentMethod.code.toLowerCase().contains(searchQuery.value.toLowerCase());
 
-      return matchesSearch;
+      final matchesStatus = showInactive.value || paymentMethod.isActive;
+
+      return matchesSearch && matchesStatus;
     }).toList();
 
     if (sortCriteria.value == 'date') {
@@ -77,5 +103,4 @@ class PaymentMethodController extends GetxController{
 
     paymentMethods.value = filtered;
   }
-
 }

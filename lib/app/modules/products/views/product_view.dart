@@ -64,13 +64,17 @@ class ProductView extends StatelessWidget {
                 children: [
                   Text(
                     'Productos',
-                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 18.0,
+                        color: AppColors.principalWhite,
+                        fontWeight: FontWeight.bold),
                   ),
-                  Obx(() =>
-                      Text(
-                        '${controller.products.length} productos',
-                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
-                      ),
+                  Obx(
+                    () => Text(
+                      '${controller.products.length} productos',
+                      style: TextStyle(
+                          fontSize: 12.0, color: AppColors.principalGray),
+                    ),
                   ),
                   Expanded(
                     child: Obx(() {
@@ -80,7 +84,8 @@ class ProductView extends StatelessWidget {
                         return const Center(
                           child: Text(
                             'No hay productos disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
                           ),
                         );
                       }
@@ -156,7 +161,7 @@ class ProductView extends StatelessWidget {
                     child: Text('Todos los estados'),
                   ),
                   ...['Activo', 'Inactivo'].map(
-                        (status) => DropdownMenuItem(
+                    (status) => DropdownMenuItem(
                       value: status,
                       child: Text(status),
                     ),
@@ -208,6 +213,7 @@ class ProductView extends StatelessWidget {
   }
 
   void _openProductForm(BuildContext context) {
+    controller.fetchAll();
     Get.to(() => ProductFormView());
   }
 }
@@ -215,28 +221,55 @@ class ProductView extends StatelessWidget {
 class ProductFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.onPrincipalBackground,
-      appBar: AppBar(
+    final ProductController productController = Get.find<ProductController>();
+
+    // Limpiar y cargar al entrar
+    productController.clearFields();
+    productController.fetchAll();
+
+    return WillPopScope(
+      onWillPop: () async {
+        productController.clearFields();
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: AppColors.onPrincipalBackground,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.keyboard_arrow_left_outlined,
-            color: AppColors.principalWhite,
+        appBar: AppBar(
+          backgroundColor: AppColors.onPrincipalBackground,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.keyboard_arrow_left_outlined,
+              color: AppColors.principalWhite,
+            ),
+            onPressed: () {
+              productController.clearFields();
+              Get.back();
+            },
           ),
-          onPressed: () => Get.back(),
+          title: Text(
+            'Agregar Producto',
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+              color: AppColors.principalWhite,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
-        title: Text(
-          'Agregar Producto',
-          style: TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-            color: AppColors.principalWhite,
-          ),
-          textAlign: TextAlign.center,
+        body: Obx(
+              () {
+            if (productController.categories.isEmpty || productController.providers.isEmpty) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.principalWhite,
+                ),
+              );
+            } else {
+              return ProductForm();
+            }
+          },
         ),
       ),
-      body: ProductForm(),
     );
   }
 }

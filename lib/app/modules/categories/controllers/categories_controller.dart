@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/categories_model.dart';
 
-class CategoriesController extends GetxController{
+class CategoriesController extends GetxController {
   final RxList<Category> categories = <Category>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs; // Nuevo: Mostrar categorías desactivadas
 
   final RxList<Category> originalCategories = <Category>[].obs;
 
-  //Category
+  // Category
   final RxString name = ''.obs;
   final RxString? code = ''.obs;
 
@@ -34,7 +35,24 @@ class CategoriesController extends GetxController{
       fetchAllCategories();
       clearFields();
     } catch (e) {
-      print('Error al guardar la categoria: $e');
+      print('Error al guardar la categoría: $e');
+    }
+  }
+
+  Future<void> deactivateCategory(int categoryId) async {
+    try {
+      final category = await dbHelper.getCategoryById(categoryId);
+      if (category != null) {
+        category.isActive = false;
+        category.updatedAt = DateTime.now();
+        await dbHelper.updateCategory(category);
+        fetchAllCategories(); // Recargar categorías después de desactivar
+        print('Categoría desactivada con ID: $categoryId');
+      } else {
+        print('Categoría con ID $categoryId no encontrada');
+      }
+    } catch (e) {
+      print('Error al desactivar la categoría: $e');
     }
   }
 
@@ -43,10 +61,16 @@ class CategoriesController extends GetxController{
     code?.value = '';
   }
 
-  void fetchAllCategories() async {
+  Future<void> fetchAllCategories() async {
     final List<Category> allCategories = await dbHelper.getCategories();
-    categories.assignAll(allCategories);
-    originalCategories.assignAll(allCategories);
+    categories.assignAll(allCategories.where((cat) => cat.isActive)); // Solo activas por defecto
+    originalCategories.assignAll(allCategories); // Todas, incluidas inactivas
+    applyFilters();
+  }
+
+  void toggleShowInactive(bool value) {
+    showInactive.value = value;
+    applyFilters();
   }
 
   void searchCategories(String query) {
@@ -60,12 +84,15 @@ class CategoriesController extends GetxController{
   }
 
   void applyFilters() {
-    final filtered = originalCategories.where((category) {
+    var filtered = originalCategories.where((category) {
       final matchesSearch = searchQuery.isEmpty ||
           category.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           (category.code?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
 
-      return matchesSearch;
+      // Filtrar por estado activo/inactivo según showInactive
+      final matchesStatus = showInactive.value || category.isActive;
+
+      return matchesSearch && matchesStatus;
     }).toList();
 
     if (sortCriteria.value == 'date') {

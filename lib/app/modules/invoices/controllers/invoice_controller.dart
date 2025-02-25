@@ -34,9 +34,7 @@ class InvoiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchAllProducts();
-    fetchAllInvoices();
-    fetchAllClients();
+    fetchAllInvoices(); // Solo cargamos invoices en onInit
   }
 
   void fetchAll() {
@@ -44,8 +42,7 @@ class InvoiceController extends GetxController {
     fetchAllClients();
   }
 
-  void fetchAllClients() async {
-    clients.clear();
+  Future<void> fetchAllClients() async {
     final List<Client> allClients = await dbHelper.getClients();
     clients.assignAll(allClients);
   }
@@ -61,7 +58,7 @@ class InvoiceController extends GetxController {
     selectedSerial.value = null;
     if (product != null) {
       final List<Serial> serials =
-          await dbHelper.getSerialsByProductId(product.id!);
+      await dbHelper.getSerialsByProductId(product.id!);
       availableSerials.assignAll(serials);
     }
   }
@@ -70,8 +67,7 @@ class InvoiceController extends GetxController {
     selectedClient.value = client;
   }
 
-  void fetchAllProducts() async {
-    products.clear();
+  Future<void> fetchAllProducts() async {
     final List<Product> allProducts = await dbHelper.getProducts();
     products.assignAll(allProducts);
   }
@@ -82,7 +78,7 @@ class InvoiceController extends GetxController {
 
   void addInvoiceLine() {
     if (selectedProduct.value == null || selectedSerial.value == null) {
-      Get.snackbar('Error', 'Debe seleccionar un producto y un serial.');
+      // Get.snackbar('Error', 'Debe seleccionar un producto y un serial.');
       return;
     }
 
@@ -177,17 +173,19 @@ class InvoiceController extends GetxController {
 
   void clearFields() {
     documentNo.value = '';
-    type.value = '';
     totalPayed.value = '';
+    type.value = '';
     qty.value = 0;
     selectedClient.value = null;
     selectedProduct.value = null;
     selectedSerial.value = null;
     invoiceLines.clear();
     availableSerials.clear();
+    clients.clear();
+    products.clear();
   }
 
-  void fetchAllInvoices() async {
+  Future<void> fetchAllInvoices() async {
     final List<Invoice> allInvoices = await dbHelper.getInvoices();
     invoices.assignAll(allInvoices);
     originalInvoices.assignAll(allInvoices);

@@ -57,13 +57,17 @@ class InvoiceView extends StatelessWidget {
                 children: [
                   Text(
                     'Ventas',
-                    style: TextStyle(fontSize: 18.0, color: AppColors.principalWhite, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 18.0,
+                        color: AppColors.principalWhite,
+                        fontWeight: FontWeight.bold),
                   ),
-                  Obx(() =>
-                      Text(
-                        '${controller.invoices.length} ventas',
-                        style: TextStyle(fontSize: 12.0, color: AppColors.principalGray),
-                      ),
+                  Obx(
+                    () => Text(
+                      '${controller.invoices.length} ventas',
+                      style: TextStyle(
+                          fontSize: 12.0, color: AppColors.principalGray),
+                    ),
                   ),
                   Expanded(
                     child: Obx(() {
@@ -73,7 +77,8 @@ class InvoiceView extends StatelessWidget {
                         return const Center(
                           child: Text(
                             'No hay ventas disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.black),
                           ),
                         );
                       }
@@ -125,6 +130,7 @@ class InvoiceView extends StatelessWidget {
       ),
     );
   }
+
   void _showSortDialog(BuildContext context, InvoiceController controller) {
     showDialog(
       context: context,
@@ -161,31 +167,53 @@ class InvoiceView extends StatelessWidget {
 }
 
 class InvoiceFormView extends StatelessWidget {
-  final InvoiceController controller = Get.find<InvoiceController>();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.onPrincipalBackground,
-      appBar: AppBar(
+    final InvoiceController controller = Get.find<InvoiceController>();
+
+    controller.clearFields();
+    controller.fetchAll();
+
+    return WillPopScope(
+      onWillPop: () async {
+        controller.clearFields();
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: AppColors.onPrincipalBackground,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.keyboard_arrow_left_outlined,
-            color: AppColors.principalWhite,
+        appBar: AppBar(
+          backgroundColor: AppColors.onPrincipalBackground,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.keyboard_arrow_left_outlined,
+              color: AppColors.principalWhite,
+            ),
+            onPressed: () {
+              controller.clearFields(); // Limpiar al salir con botón de appbar
+              Get.back();
+            },
           ),
-          onPressed: (){
-            controller.clearFields();
-            Get.back();
+          title: const Text(
+            'Agregar Venta',
+            style: TextStyle(color: AppColors.principalWhite),
+          ),
+        ),
+        body: Obx(
+              () {
+            if (controller.clients.isEmpty || controller.products.isEmpty) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.principalWhite,
+                ),
+              );
+            } else {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: InvoiceForm(),
+              );
+            }
           },
         ),
-        title: const Text(
-          'Agregar Venta',
-          style: TextStyle(color: AppColors.principalWhite),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: InvoiceForm(),
       ),
     );
   }

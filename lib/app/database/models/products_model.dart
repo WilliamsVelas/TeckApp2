@@ -10,6 +10,7 @@ class Product {
   int providerId;
   DateTime createdAt;
   DateTime? updatedAt;
+  bool isActive;
 
   Product({
     this.id,
@@ -23,6 +24,7 @@ class Product {
     this.providerId = 0,
     required this.createdAt,
     this.updatedAt,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class Product {
       'providerId': providerId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -56,6 +59,7 @@ class Product {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
+      isActive: map['isActive'] == 1,
     );
   }
 }

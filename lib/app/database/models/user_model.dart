@@ -7,6 +7,7 @@ class User {
   double? amount;
   DateTime createdAt;
   DateTime? updatedAt;
+  bool isActive;
 
   User({
     this.id,
@@ -17,6 +18,7 @@ class User {
     this.amount,
     required this.createdAt,
     this.updatedAt,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +31,7 @@ class User {
       'amount': amount,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -44,6 +47,7 @@ class User {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
+      isActive: map['isActive'] == 1,
     );
   }
 }

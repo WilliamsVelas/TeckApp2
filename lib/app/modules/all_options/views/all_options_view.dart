@@ -37,7 +37,7 @@ class AllOptionsView extends StatelessWidget {
     {
       'icon': Icons.comment_bank,
       'name': 'C. Bancos',
-      'route': AppRoutes.PAYMENTMETHOD,
+      'route': AppRoutes.BANK_ACCOUNT,
       'color': Colors.blue,
       'iconColor': AppColors.onPrincipalBackground,
     },
@@ -93,7 +93,7 @@ class AllOptionsView extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.keyboard_arrow_left_outlined,
               color: AppColors.principalWhite),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.offAllNamed(AppRoutes.HOME),
         ),
         title: const Text(''),
       ),

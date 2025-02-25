@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
+import 'models/bank_account_model.dart';
 import 'models/categories_model.dart';
 import 'models/clients_model.dart';
 import 'models/invoice_lines_model.dart';
@@ -39,7 +40,7 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    //products table
+    // products table
     await db.execute('''
     CREATE TABLE products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,33 +54,36 @@ class DatabaseHelper {
       categoryId INTEGER,
       providerId INTEGER,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //categories table
+    // categories table
     await db.execute('''
     CREATE TABLE categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       code TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //payment methods table
+    // payment methods table
     await db.execute('''
     CREATE TABLE paymentMethods (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       code TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //user table
+    // user table
     await db.execute('''
     CREATE TABLE users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,11 +93,12 @@ class DatabaseHelper {
       password TEXT,
       amount REAL,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //clients table
+    // clients table
     await db.execute('''
     CREATE TABLE clients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,11 +110,12 @@ class DatabaseHelper {
       affiliateCode TEXT,
       value TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //providers table
+    // providers table
     await db.execute('''
     CREATE TABLE providers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,21 +124,23 @@ class DatabaseHelper {
       businessName TEXT,
       value TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //images table
+    // images table
     await db.execute('''
     CREATE TABLE images (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       uri TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //serials table
+    // serials table
     await db.execute('''
     CREATE TABLE serials (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,11 +148,12 @@ class DatabaseHelper {
       serial TEXT,
       status TEXT,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //bank account table
+    // bank account table
     await db.execute('''
     CREATE TABLE banckAccounts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,11 +162,12 @@ class DatabaseHelper {
       code TEXT,
       clientId INTEGER,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //invoices table
+    // invoices table
     await db.execute('''
     CREATE TABLE invoices (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,11 +181,12 @@ class DatabaseHelper {
       clientId INTEGER,
       productId INTEGER,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
 
-    //invoice line table
+    // invoice line table
     await db.execute('''
     CREATE TABLE invoiceLine (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,9 +199,10 @@ class DatabaseHelper {
       productSerial TEXT,
       invoiceId INTEGER,
       createdAt TEXT,
-      updatedAt TEXT
+      updatedAt TEXT,
+      isActive INTEGER DEFAULT 1
     )
-  ''');
+    ''');
   }
 
   Future<void> close() async {
@@ -198,24 +210,22 @@ class DatabaseHelper {
     db.close();
   }
 
-  //Products
-  //Insert product
+  // Products
   Future<int> insertProduct(Product product) async {
     final db = await database;
+    product.isActive = true; // Asegurar que isActive sea true por defecto
     return await db.insert('products', product.toMap());
   }
 
-  //Get products
   Future<List<Product>> getProducts() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('products');
+    final List<Map<String, dynamic>> maps = await db.query('products', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return Product.fromMap(maps[i]);
     });
   }
 
-  //Update product
   Future<int> updateProduct(Product product) async {
     final db = await database;
     product.updatedAt = DateTime.now();
@@ -227,11 +237,10 @@ class DatabaseHelper {
     );
   }
 
-  //Desactive product
   Future<int> desactiveProduct(Product product) async {
     final db = await database;
     product.updatedAt = DateTime.now();
-
+    product.isActive = false; // Desactivar producto
     return await db.update(
       'products',
       product.toMap(),
@@ -240,12 +249,11 @@ class DatabaseHelper {
     );
   }
 
-  //Get product by id
   Future<Product?> getProductById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'products',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -258,23 +266,21 @@ class DatabaseHelper {
   }
 
   // Categories
-  // Insert category
   Future<int> insertCategory(Category category) async {
     final db = await database;
+    category.isActive = true;
     return await db.insert('categories', category.toMap());
   }
 
-  // Get all categories
   Future<List<Category>> getCategories() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('categories');
+    final List<Map<String, dynamic>> maps = await db.query('categories', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return Category.fromMap(maps[i]);
     });
   }
 
-  // Update category
   Future<int> updateCategory(Category category) async {
     final db = await database;
     return await db.update(
@@ -285,12 +291,11 @@ class DatabaseHelper {
     );
   }
 
-  // Get category by ID
   Future<Category?> getCategoryById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'categories',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -303,23 +308,21 @@ class DatabaseHelper {
   }
 
   // Payment Methods
-  // Insert payment method
   Future<int> insertPaymentMethod(PaymentMethod paymentMethod) async {
     final db = await database;
+    paymentMethod.isActive = true;
     return await db.insert('paymentMethods', paymentMethod.toMap());
   }
 
-  // Get all payment methods
   Future<List<PaymentMethod>> getPaymentMethods() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('paymentMethods');
+    final List<Map<String, dynamic>> maps = await db.query('paymentMethods', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return PaymentMethod.fromMap(maps[i]);
     });
   }
 
-  // Update payment method
   Future<int> updatePaymentMethod(PaymentMethod paymentMethod) async {
     final db = await database;
     return await db.update(
@@ -330,12 +333,11 @@ class DatabaseHelper {
     );
   }
 
-  // Get payment method by ID
   Future<PaymentMethod?> getPaymentMethodById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'paymentMethods',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -348,23 +350,21 @@ class DatabaseHelper {
   }
 
   // Clients
-  // Insert client
   Future<int> insertClient(Client client) async {
     final db = await database;
+    client.isActive = true;
     return await db.insert('clients', client.toMap());
   }
 
-  // Get all clients
   Future<List<Client>> getClients() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('clients');
+    final List<Map<String, dynamic>> maps = await db.query('clients', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return Client.fromMap(maps[i]);
     });
   }
 
-  // Update client
   Future<int> updateClient(Client client) async {
     final db = await database;
     return await db.update(
@@ -375,12 +375,11 @@ class DatabaseHelper {
     );
   }
 
-  // Get client by ID
   Future<Client?> getClientById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'clients',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -393,23 +392,21 @@ class DatabaseHelper {
   }
 
   // Providers
-  // Insert provider
   Future<int> insertProvider(Provider provider) async {
     final db = await database;
+    provider.isActive = true;
     return await db.insert('providers', provider.toMap());
   }
 
-  // Get all providers
   Future<List<Provider>> getProviders() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('providers');
+    final List<Map<String, dynamic>> maps = await db.query('providers', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return Provider.fromMap(maps[i]);
     });
   }
 
-  // Update provider
   Future<int> updateProvider(Provider provider) async {
     final db = await database;
     return await db.update(
@@ -420,12 +417,11 @@ class DatabaseHelper {
     );
   }
 
-  // Get provider by ID
   Future<Provider?> getProviderById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'providers',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -438,12 +434,11 @@ class DatabaseHelper {
   }
 
   // Serials
-  // Get serials by productId
   Future<List<Serial>> getSerialsByProductId(int productId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'serials',
-      where: 'productId = ?',
+      where: 'productId = ? AND isActive = 1',
       whereArgs: [productId],
     );
 
@@ -452,40 +447,38 @@ class DatabaseHelper {
     });
   }
 
-  // Insert serial
   Future<int> insertSerial(Serial serial) async {
     final db = await database;
+    serial.isActive = true;
     return await db.insert('serials', serial.toMap());
   }
 
-  // Delete serial
   Future<int> deleteSerial(int id) async {
     final db = await database;
-    return await db.delete(
+    return await db.update(
       'serials',
+      {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
-    );
+    ); // Cambiamos a desactivar en lugar de eliminar
   }
 
   // Invoices
-  // Insert invoice
   Future<int> insertInvoice(Invoice invoice) async {
     final db = await database;
+    invoice.isActive = true;
     return await db.insert('invoices', invoice.toMap());
   }
 
-  // Get all invoices
   Future<List<Invoice>> getInvoices() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('invoices');
+    final List<Map<String, dynamic>> maps = await db.query('invoices', where: 'isActive = 1');
 
     return List.generate(maps.length, (i) {
       return Invoice.fromMap(maps[i]);
     });
   }
 
-  // Update invoice
   Future<int> updateInvoice(Invoice invoice) async {
     final db = await database;
     return await db.update(
@@ -496,12 +489,11 @@ class DatabaseHelper {
     );
   }
 
-  // Get invoice by ID
   Future<Invoice?> getInvoiceById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'invoices',
-      where: 'id = ?',
+      where: 'id = ? AND isActive = 1',
       whereArgs: [id],
       limit: 1,
     );
@@ -514,12 +506,11 @@ class DatabaseHelper {
   }
 
   // InvoiceLine
-  // Get invoice lines by invoiceId
   Future<List<InvoiceLine>> getInvoiceLinesByInvoiceId(int invoiceId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'invoiceLine',
-      where: 'invoiceId = ?',
+      where: 'invoiceId = ? AND isActive = 1',
       whereArgs: [invoiceId],
     );
 
@@ -528,19 +519,84 @@ class DatabaseHelper {
     });
   }
 
-  // Insert invoice line
   Future<int> insertInvoiceLine(InvoiceLine invoiceLine) async {
     final db = await database;
+    invoiceLine.isActive = true;
     return await db.insert('invoiceLine', invoiceLine.toMap());
   }
 
-  // Delete invoice line
   Future<int> deleteInvoiceLine(int id) async {
     final db = await database;
-    return await db.delete(
+    return await db.update(
       'invoiceLine',
+      {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
+    ); // Cambiamos a desactivar en lugar de eliminar
+  }
+
+// BankAccounts
+  Future<int> insertBankAccount(BankAccount bankAccount) async {
+    final db = await database;
+    bankAccount.isActive = true;
+    return await db.insert('banckAccounts', bankAccount.toMap());
+  }
+
+  Future<List<BankAccount>> getBankAccounts() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('banckAccounts', where: 'isActive = 1');
+
+    return List.generate(maps.length, (i) {
+      return BankAccount.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<BankAccount>> getBankAccountsByClientId(int clientId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'banckAccounts',
+      where: 'clientId = ? AND isActive = 1',
+      whereArgs: [clientId],
     );
+
+    return List.generate(maps.length, (i) {
+      return BankAccount.fromMap(maps[i]);
+    });
+  }
+
+  Future<BankAccount?> getBankAccountById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'banckAccounts',
+      where: 'id = ? AND isActive = 1',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return BankAccount.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<int> updateBankAccount(BankAccount bankAccount) async {
+    final db = await database;
+    return await db.update(
+      'banckAccounts',
+      bankAccount.toMap(),
+      where: 'id = ?',
+      whereArgs: [bankAccount.id],
+    );
+  }
+
+  Future<int> deleteBankAccount(int id) async {
+    final db = await database;
+    return await db.update(
+      'banckAccounts',
+      {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    ); // Cambiamos a desactivar en lugar de eliminar
   }
 }

@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/clients_model.dart';
 
-class ClientsController extends GetxController{
+class ClientsController extends GetxController {
   final RxList<Client> clients = <Client>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs; // Nuevo: Mostrar clientes desactivados
 
   final RxList<Client> originalClients = <Client>[].obs;
 
-  //Client
+  // Client
   final RxString name = ''.obs;
   final RxString lastName = ''.obs;
   final RxString businessName = ''.obs;
@@ -48,6 +49,23 @@ class ClientsController extends GetxController{
     }
   }
 
+  Future<void> deactivateClient(int clientId) async {
+    try {
+      final client = await dbHelper.getClientById(clientId);
+      if (client != null) {
+        client.isActive = false;
+        client.updatedAt = DateTime.now();
+        await dbHelper.updateClient(client);
+        fetchAllClients();
+        print('Cliente desactivado con ID: $clientId');
+      } else {
+        print('Cliente con ID $clientId no encontrado');
+      }
+    } catch (e) {
+      print('Error al desactivar el cliente: $e');
+    }
+  }
+
   void clearFields() {
     name.value = '';
     lastName.value = '';
@@ -60,8 +78,14 @@ class ClientsController extends GetxController{
 
   void fetchAllClients() async {
     final List<Client> allClients = await dbHelper.getClients();
-    clients.assignAll(allClients);
-    originalClients.assignAll(allClients);
+    clients.assignAll(allClients.where((client) => client.isActive)); // Solo activos por defecto
+    originalClients.assignAll(allClients); // Todos, incluidos inactivos
+    applyFilters();
+  }
+
+  void toggleShowInactive(bool value) {
+    showInactive.value = value;
+    applyFilters();
   }
 
   void searchClients(String query) {
@@ -82,7 +106,9 @@ class ClientsController extends GetxController{
           client.businessName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           client.affiliateCode.toLowerCase().contains(searchQuery.value.toLowerCase());
 
-      return matchesSearch;
+      final matchesStatus = showInactive.value || client.isActive;
+
+      return matchesSearch && matchesStatus;
     }).toList();
 
     if (sortCriteria.value == 'date') {

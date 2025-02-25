@@ -1,6 +1,8 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:teck_app/app/modules/all_options/bindings/all_options_binding.dart';
 import 'package:teck_app/app/modules/all_options/views/all_options_view.dart';
+import 'package:teck_app/app/modules/bank_accounts/bindings/bank_account_binding.dart';
+import 'package:teck_app/app/modules/bank_accounts/views/bank_account_view.dart';
 import 'package:teck_app/app/modules/categories/bindings/categories_binding.dart';
 import 'package:teck_app/app/modules/categories/views/categories_view.dart';
 import 'package:teck_app/app/modules/clients/bindings/client_binding.dart';
@@ -54,6 +56,12 @@ class AppPages {
       name: AppRoutes.PROVIDERS,
       page: () => ProviderView(),
       binding: ProviderBinding(),
+    ),
+    //Bank accounts view
+    GetPage(
+      name: AppRoutes.BANK_ACCOUNT,
+      page: () => BankAccountView(),
+      binding: BankAccountBinding(),
     ),
   ];
 }
