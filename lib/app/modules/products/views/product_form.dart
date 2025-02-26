@@ -10,7 +10,7 @@ import '../../../database/models/categories_model.dart';
 import '../../../database/models/providers_model.dart';
 
 class ProductForm extends StatelessWidget {
-  final productController = Get.find<ProductController>();
+  final ProductController productController = Get.find<ProductController>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +21,12 @@ class ProductForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
-
             GenericFormInput(
               label: 'Nombre del producto',
               keyboardType: TextInputType.text,
               icon: Icons.production_quantity_limits,
               onChanged: (value) => productController.name.value = value,
-              controller: TextEditingController()
-                ..text = productController.name.value,
+              controller: TextEditingController()..text = productController.name.value,
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -37,8 +34,7 @@ class ProductForm extends StatelessWidget {
               keyboardType: TextInputType.text,
               icon: Icons.code,
               onChanged: (value) => productController.code.value = value,
-              controller: TextEditingController()
-                ..text = productController.code.value,
+              controller: TextEditingController()..text = productController.code.value,
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -46,8 +42,7 @@ class ProductForm extends StatelessWidget {
               keyboardType: TextInputType.number,
               icon: Icons.attach_money,
               onChanged: (value) => productController.price.value = value,
-              controller: TextEditingController()
-                ..text = productController.price.value,
+              controller: TextEditingController()..text = productController.price.value,
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -55,8 +50,7 @@ class ProductForm extends StatelessWidget {
               keyboardType: TextInputType.number,
               icon: Icons.store,
               onChanged: (value) => productController.minStock.value = value,
-              controller: TextEditingController()
-                ..text = productController.minStock.value,
+              controller: TextEditingController()..text = productController.minStock.value,
             ),
             SizedBox(height: 16.0),
             Obx(
@@ -65,8 +59,7 @@ class ProductForm extends StatelessWidget {
                 value: productController.selectedCategory.value,
                 items: productController.categories,
                 itemTextBuilder: (category) => category.name,
-                onChanged: (category) =>
-                    productController.selectCategory(category),
+                onChanged: (category) => productController.selectCategory(category),
               ),
             ),
             SizedBox(height: 16.0),
@@ -76,61 +69,82 @@ class ProductForm extends StatelessWidget {
                 value: productController.selectedProvider.value,
                 items: productController.providers,
                 itemTextBuilder: (provider) => provider.name ?? '',
-                onChanged: (provider) =>
-                    productController.selectProvider(provider),
+                onChanged: (provider) => productController.selectProvider(provider),
               ),
             ),
-            SizedBox(height: 24.0),
+            SizedBox(height: 16.0),
             Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: productController.newSerialController,
-                    decoration: InputDecoration(
-                      labelText: 'Serial',
-                      labelStyle: TextStyle(color: AppColors.principalWhite),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide:
-                          BorderSide(color: AppColors.principalWhite)),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: AppColors.principalButton)),
-                    ),
-                    style: TextStyle(color: AppColors.principalWhite),
-                    onChanged: (value) =>
-                    productController.newSerial.value = value,
+                Obx(
+                      () => Checkbox(
+                    value: productController.isSerial.value,
+                    onChanged: (value) {
+                      productController.isSerial.value = value ?? false;
+                    },
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.add, color: AppColors.principalGreen),
-                  onPressed: () => productController.addSerial(),
+                Text(
+                  '¿Usa seriales?',
+                  style: TextStyle(color: AppColors.principalWhite),
                 ),
               ],
             ),
-
             SizedBox(height: 16.0),
-
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 150),
-              child: Obx(() => ListView.separated(
-                shrinkWrap: true,
-                itemCount: productController.serials.length,
-                separatorBuilder: (context, index) =>
-                    Divider(color: AppColors.principalGray),
-                itemBuilder: (context, index) {
-                  final serial = productController.serials[index];
-                  return ListTile(
-                    title: Text(serial,
-                        style: TextStyle(
-                            color: AppColors.principalWhite)),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: AppColors.invalid),
-                      onPressed: () =>
-                          productController.removeSerial(index),
+            Obx(
+                  () => productController.isSerial.value
+                  ? Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: productController.newSerialController,
+                          decoration: InputDecoration(
+                            labelText: 'Serial',
+                            labelStyle: TextStyle(color: AppColors.principalWhite),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: AppColors.principalWhite)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: AppColors.principalButton)),
+                          ),
+                          style: TextStyle(color: AppColors.principalWhite),
+                          onChanged: (value) => productController.newSerial.value = value,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add, color: AppColors.principalGreen),
+                        onPressed: () => productController.addSerial(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 100),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: productController.serials.length,
+                      separatorBuilder: (context, index) => Divider(color: AppColors.principalGray),
+                      itemBuilder: (context, index) {
+                        final serial = productController.serials[index];
+                        return ListTile(
+                          title: Text(serial, style: TextStyle(color: AppColors.principalWhite)),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: AppColors.invalid),
+                            onPressed: () => productController.removeSerial(index),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              )),
+                  ),
+                ],
+              )
+                  : GenericFormInput(
+                label: 'Cantidad',
+                keyboardType: TextInputType.number,
+                icon: Icons.numbers,
+                controller: productController.qtyController,
+                onChanged: (value) {},
+              ),
             ),
             Spacer(),
             Row(
@@ -145,8 +159,7 @@ class ProductForm extends StatelessWidget {
                     backgroundColor: AppColors.principalButton,
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: TextStyle(fontSize: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
                   child: Text('Guardar'),
                 ),
@@ -159,8 +172,7 @@ class ProductForm extends StatelessWidget {
                     backgroundColor: AppColors.invalid,
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: TextStyle(fontSize: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
                   child: Text('Borrar'),
                 ),

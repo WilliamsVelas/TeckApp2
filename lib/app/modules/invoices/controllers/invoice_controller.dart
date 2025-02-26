@@ -34,7 +34,7 @@ class InvoiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchAllInvoices(); // Solo cargamos invoices en onInit
+    fetchAllInvoices();
   }
 
   void fetchAll() {
@@ -58,7 +58,7 @@ class InvoiceController extends GetxController {
     selectedSerial.value = null;
     if (product != null) {
       final List<Serial> serials =
-      await dbHelper.getSerialsByProductId(product.id!);
+          await dbHelper.getSerialsByProductId(product.id!);
       availableSerials.assignAll(serials);
     }
   }
@@ -162,12 +162,12 @@ class InvoiceController extends GetxController {
         await dbHelper.insertInvoiceLine(updatedLine);
       }
 
-      Get.snackbar('Éxito', 'Factura guardada correctamente');
-      fetchAllInvoices();
-      clearFields();
+      // Get.snackbar('Éxito', 'Factura guardada correctamente');
       Get.back();
+      clearFields();
+      fetchAllInvoices();
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo guardar la factura: ${e.toString()}');
+      // Get.snackbar('Error', 'No se pudo guardar la factura: ${e.toString()}');
     }
   }
 

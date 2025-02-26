@@ -213,13 +213,17 @@ class DatabaseHelper {
   // Products
   Future<int> insertProduct(Product product) async {
     final db = await database;
-    product.isActive = true; // Asegurar que isActive sea true por defecto
+    product.isActive = true;
     return await db.insert('products', product.toMap());
   }
 
   Future<List<Product>> getProducts() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('products', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'products',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return Product.fromMap(maps[i]);
@@ -265,6 +269,20 @@ class DatabaseHelper {
     }
   }
 
+  Future<List<Product>> getLimitedProducts() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'products',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+      limit: 10,
+    );
+
+    return List.generate(maps.length, (i) {
+      return Product.fromMap(maps[i]);
+    });
+  }
+
   // Categories
   Future<int> insertCategory(Category category) async {
     final db = await database;
@@ -274,7 +292,11 @@ class DatabaseHelper {
 
   Future<List<Category>> getCategories() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('categories', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'categories',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return Category.fromMap(maps[i]);
@@ -316,7 +338,11 @@ class DatabaseHelper {
 
   Future<List<PaymentMethod>> getPaymentMethods() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('paymentMethods', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'paymentMethods',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return PaymentMethod.fromMap(maps[i]);
@@ -358,7 +384,11 @@ class DatabaseHelper {
 
   Future<List<Client>> getClients() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('clients', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'clients',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return Client.fromMap(maps[i]);
@@ -400,7 +430,11 @@ class DatabaseHelper {
 
   Future<List<Provider>> getProviders() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('providers', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'providers',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return Provider.fromMap(maps[i]);
@@ -472,7 +506,11 @@ class DatabaseHelper {
 
   Future<List<Invoice>> getInvoices() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('invoices', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'invoices',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return Invoice.fromMap(maps[i]);
@@ -503,6 +541,28 @@ class DatabaseHelper {
     } else {
       return null;
     }
+  }
+
+  Future<List<Invoice>> getLimitedInvoices() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'invoices',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+      limit: 10,
+    );
+
+    return List.generate(maps.length, (i) {
+      return Invoice.fromMap(maps[i]);
+    });
+  }
+
+  Future<double> getTotalPayed() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT SUM(totalPayed) as total FROM invoices WHERE isActive = 1',
+    );
+    return result.isNotEmpty ? (result.first['total'] as double? ?? 0.0) : 0.0;
   }
 
   // InvoiceLine
@@ -544,7 +604,11 @@ class DatabaseHelper {
 
   Future<List<BankAccount>> getBankAccounts() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('banckAccounts', where: 'isActive = 1');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'banckAccounts',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
 
     return List.generate(maps.length, (i) {
       return BankAccount.fromMap(maps[i]);

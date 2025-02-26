@@ -35,10 +35,12 @@ class ProductController extends GetxController {
   final RxInt serialsQty = 0.obs;
   final RxInt providerId = 0.obs;
   final RxInt categoryId = 0.obs;
+  final RxBool isSerial = false.obs; // Nuevo flag para controlar seriales
 
   final dbHelper = DatabaseHelper();
 
   final newSerialController = TextEditingController();
+  final qtyController = TextEditingController(); // controlador para qty
 
   @override
   void onInit() {
@@ -118,11 +120,23 @@ class ProductController extends GetxController {
       return;
     }
 
+    int parsedQty = 0;
+    if (isSerial.value) {
+      parsedQty = serials.length; // Cantidad de seriales
+    } else {
+      try {
+        parsedQty = int.parse(qtyController.text); // Cantidad directa
+      } catch (e) {
+        print('Error al convertir la cantidad: $e');
+        return;
+      }
+    }
+
     final product = Product(
       name: name.value,
       code: code.value,
       price: parsedPrice,
-      serialsQty: serials.length,
+      serialsQty: parsedQty, // Usamos parsedQty según isSerial
       refPrice: parsedPrice,
       minStock: parsedMinStock,
       categoryId: selectedCategory.value!.id!,
@@ -134,15 +148,17 @@ class ProductController extends GetxController {
       int productId = await dbHelper.insertProduct(product);
       print('Producto guardado con ID: $productId');
 
-      for (var serialNumber in serials) {
-        Serial serial = Serial(
-          productId: productId,
-          serial: serialNumber,
-          createdAt: DateTime.now(),
-        );
-        await dbHelper.insertSerial(serial);
+      if (isSerial.value) {
+        for (var serialNumber in serials) {
+          Serial serial = Serial(
+            productId: productId,
+            serial: serialNumber,
+            createdAt: DateTime.now(),
+          );
+          await dbHelper.insertSerial(serial);
+        }
+        print('Seriales guardados para el producto $productId');
       }
-      print('Seriales guardados para el producto $productId');
 
       fetchAllProducts();
       Get.back();
@@ -182,6 +198,8 @@ class ProductController extends GetxController {
     selectedCategory.value = null;
     selectedProvider.value = null;
     newSerialController.clear();
+    qtyController.clear(); // Limpiar qtyController
+    isSerial.value = false; // Reiniciar isSerial
   }
 
   void toggleShowInactive(bool value) {
@@ -191,8 +209,8 @@ class ProductController extends GetxController {
 
   Future<void> fetchAllProducts() async {
     final List<Product> allProducts = await dbHelper.getProducts();
-    products.assignAll(allProducts.where((prod) => prod.isActive)); // Solo activos por defecto
-    originalProducts.assignAll(allProducts); // Todos, incluidos inactivos
+    products.assignAll(allProducts.where((prod) => prod.isActive));
+    originalProducts.assignAll(allProducts);
     applyFilters();
   }
 
