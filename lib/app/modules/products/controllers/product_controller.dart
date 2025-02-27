@@ -198,8 +198,8 @@ class ProductController extends GetxController {
     selectedCategory.value = null;
     selectedProvider.value = null;
     newSerialController.clear();
-    qtyController.clear(); // Limpiar qtyController
-    isSerial.value = false; // Reiniciar isSerial
+    qtyController.clear();
+    isSerial.value = false;
   }
 
   void toggleShowInactive(bool value) {

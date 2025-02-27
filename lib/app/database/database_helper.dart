@@ -10,6 +10,7 @@ import 'models/invoices_model.dart';
 import 'models/payment_method_model.dart';
 import 'models/providers_model.dart';
 import 'models/serials_model.dart';
+import 'models/user_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -90,8 +91,6 @@ class DatabaseHelper {
       name TEXT,
       lastName TEXT,
       username TEXT,
-      password TEXT,
-      amount REAL,
       createdAt TEXT,
       updatedAt TEXT,
       isActive INTEGER DEFAULT 1
@@ -661,6 +660,52 @@ class DatabaseHelper {
       {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
-    ); // Cambiamos a desactivar en lugar de eliminar
+    );
+  }
+
+  // Users
+  Future<int> insertUser(User user) async {
+    final db = await database;
+    user.isActive = true; // Establecer isActive como true por defecto
+    return await db.insert('users', user.toMap());
+  }
+
+  Future<List<User>> getUsers() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'isActive = 1',
+      orderBy: 'createdAt DESC',
+    );
+
+    return List.generate(maps.length, (i) {
+      return User.fromMap(maps[i]);
+    });
+  }
+
+  Future<int> updateUser(User user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<User?> getUserById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ? AND isActive = 1',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 }

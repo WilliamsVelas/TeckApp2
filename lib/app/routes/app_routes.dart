@@ -17,4 +17,5 @@ class AppRoutes {
   static const PAYMENTMETHOD = '/paymentMethod';
   static const REPORTS = '/reports';
   static const BANK_ACCOUNT = '/bankAccount';
+  static const USER = '/user';
 }
