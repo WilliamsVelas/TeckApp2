@@ -24,7 +24,10 @@ class ProviderView extends GetView<ProviderController> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: const Text(''),
+        title: Text(
+          'Proveedores',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
       ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
@@ -84,7 +87,7 @@ class ProviderView extends GetView<ProviderController> {
                         return const Center(
                           child: Text(
                             'No hay proveedores disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

@@ -3,8 +3,6 @@ class Client {
   String name;
   String lastName;
   String businessName;
-  String bankAccount;
-  String codeBank;
   String affiliateCode;
   String value;
   DateTime createdAt;
@@ -15,8 +13,6 @@ class Client {
     required this.name,
     required this.lastName,
     required this.businessName,
-    required this.bankAccount,
-    required this.codeBank,
     required this.affiliateCode,
     required this.value,
     required this.createdAt,
@@ -30,8 +26,6 @@ class Client {
       'name': name,
       'lastName': lastName,
       'businessName': businessName,
-      'bankAccount': bankAccount,
-      'codeBank': codeBank,
       'affiliateCode': affiliateCode,
       'value': value,
       'createdAt': createdAt.toIso8601String(),
@@ -46,8 +40,6 @@ class Client {
       name: map['name'] as String,
       lastName: map['lastName'] as String,
       businessName: map['businessName'] as String,
-      bankAccount: map['bankAccount'] as String,
-      codeBank: map['codeBank'] as String,
       affiliateCode: map['affiliateCode'] as String,
       value: map['value'] as String,
       createdAt: DateTime.parse(map['createdAt'] as String),

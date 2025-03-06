@@ -21,7 +21,10 @@ class ClientView extends GetView<ClientsController> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: const Text(''),
+        title:Text(
+          'Clientes',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
       ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
@@ -81,7 +84,7 @@ class ClientView extends GetView<ClientsController> {
                         return const Center(
                           child: Text(
                             'No hay clientes disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

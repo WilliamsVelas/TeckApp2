@@ -16,6 +16,13 @@ class ProductView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.onPrincipalBackground,
+        title: Text(
+          'Productos',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
+      ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
         children: [
@@ -85,7 +92,7 @@ class ProductView extends StatelessWidget {
                           child: Text(
                             'No hay productos disponibles.',
                             style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
+                                TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

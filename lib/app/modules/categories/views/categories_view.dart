@@ -24,7 +24,10 @@ class CategoriesView extends GetView<CategoriesController> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: const Text(''),
+        title: Text(
+          'Categorías',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
       ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
@@ -96,7 +99,7 @@ class CategoriesView extends GetView<CategoriesController> {
                         return const Center(
                           child: Text(
                             'No hay categorías disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

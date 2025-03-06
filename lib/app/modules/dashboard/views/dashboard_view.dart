@@ -123,7 +123,7 @@ class DashboardView extends StatelessWidget {
                           return const Center(
                             child: Text(
                               'No hay productos disponibles.',
-                              style: TextStyle(fontSize: 16.0, color: Colors.black),
+                              style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                             ),
                           );
                         }
@@ -178,7 +178,7 @@ class DashboardView extends StatelessWidget {
                           return const Center(
                             child: Text(
                               'No hay ventas disponibles.',
-                              style: TextStyle(fontSize: 16.0, color: Colors.black),
+                              style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                             ),
                           );
                         }

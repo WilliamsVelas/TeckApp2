@@ -104,8 +104,6 @@ class DatabaseHelper {
       name TEXT,
       lastName TEXT,
       businessName TEXT,
-      bankAccount TEXT,
-      codeBank TEXT,
       affiliateCode TEXT,
       value TEXT,
       createdAt TEXT,

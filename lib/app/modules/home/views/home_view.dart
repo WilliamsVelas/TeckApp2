@@ -17,7 +17,7 @@ class HomeView extends GetView<HomeController> {
       body: Obx(
         () => Column(
           children: [
-            if (controller.showAppBar) CustomAppBar(userName: "Usuario"),
+            if (controller.showAppBar) CustomAppBar(userName: controller.username.value),
             Expanded(
               child: controller.currentPage,
             ),

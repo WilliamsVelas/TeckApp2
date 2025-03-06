@@ -42,14 +42,7 @@ class ClientCard extends StatelessWidget {
                           size: 20,
                         ),
                         Text(
-                          ' (${client.codeBank})-',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.principalGray,
-                          ),
-                        ),
-                        Text(
-                          '${client.bankAccount}',
+                          client.value,
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.principalGray,

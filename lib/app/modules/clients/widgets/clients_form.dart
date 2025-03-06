@@ -57,24 +57,6 @@ class ClientForm extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
-              label: 'Cuenta Bancaria',
-              keyboardType: TextInputType.text,
-              icon: Icons.account_balance,
-              onChanged: (value) => clientController.bankAccount.value = value,
-              controller: TextEditingController()
-                ..text = clientController.bankAccount.value,
-            ),
-            SizedBox(height: 16.0),
-            GenericFormInput(
-              label: 'Código del Banco',
-              keyboardType: TextInputType.text,
-              icon: Icons.account_balance,
-              onChanged: (value) => clientController.codeBank.value = value,
-              controller: TextEditingController()
-                ..text = clientController.codeBank.value,
-            ),
-            SizedBox(height: 16.0),
-            GenericFormInput(
               label: 'Código de Afiliado',
               keyboardType: TextInputType.text,
               icon: Icons.confirmation_number,

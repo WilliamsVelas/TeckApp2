@@ -9,6 +9,9 @@ import 'package:teck_app/app/modules/invoices/views/invoice_view.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/app/routes/app_routes.dart';
 
+import '../../../database/database_helper.dart';
+import '../../../database/models/user_model.dart';
+
 class HomeController extends GetxController {
   final RxInt _currentIndex = 0.obs;
   final List<Widget> pages = [
@@ -17,9 +20,20 @@ class HomeController extends GetxController {
     _NavigatorWrapper(child: InvoiceView()),
   ];
 
+  final dbHelper = DatabaseHelper();
+
+  final RxString username = 'Usuario'.obs;
+
   int get currentIndex => _currentIndex.value;
 
   Widget get currentPage => pages[_currentIndex.value];
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchUser();
+  }
+
 
   void changeTab(int index) {
     if (index == 3) {
@@ -29,9 +43,18 @@ class HomeController extends GetxController {
     }
   }
 
-  bool get showAppBar => currentIndex != 3;
+  bool get showAppBar => currentIndex == 0;
 
   bool get showBottomNav => currentIndex != 3;
+
+  Future<void> fetchUser() async {
+    final List<User> users = await dbHelper.getUsers();
+    if (users.isNotEmpty) {
+      username.value = users.first.username;
+    }else{
+      Get.toNamed(AppRoutes.USER);
+    }
+  }
 }
 
 class _NavigatorWrapper extends StatelessWidget {

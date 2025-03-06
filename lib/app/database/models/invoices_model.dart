@@ -10,7 +10,7 @@ class Invoice {
   int clientId;
   DateTime createdAt;
   DateTime? updatedAt;
-  bool isActive; // Nuevo campo
+  bool isActive;
 
   Invoice({
     this.id,
@@ -24,7 +24,7 @@ class Invoice {
     required this.clientId,
     required this.createdAt,
     this.updatedAt,
-    this.isActive = true, // Valor por defecto
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -40,7 +40,7 @@ class Invoice {
       'clientId': clientId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
-      'isActive': isActive ? 1 : 0, // Convertir bool a INTEGER
+      'isActive': isActive ? 1 : 0,
     };
   }
 
@@ -59,7 +59,7 @@ class Invoice {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : null,
-      isActive: map['isActive'] == 1, // Convertir INTEGER a bool
+      isActive: map['isActive'] == 1,
     );
   }
 }

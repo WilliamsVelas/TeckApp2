@@ -15,6 +15,13 @@ class InvoiceView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.onPrincipalBackground,
+        title: Text(
+          'Ventas',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
+      ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
         children: [
@@ -78,7 +85,7 @@ class InvoiceView extends StatelessWidget {
                           child: Text(
                             'No hay ventas disponibles.',
                             style:
-                                TextStyle(fontSize: 16.0, color: Colors.black),
+                                TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

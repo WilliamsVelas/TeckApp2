@@ -83,7 +83,7 @@ class PaymentMethodView extends GetView<PaymentMethodController> {
                         return const Center(
                           child: Text(
                             'No hay métodos de pago disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }

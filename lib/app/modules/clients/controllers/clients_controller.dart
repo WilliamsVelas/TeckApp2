@@ -7,7 +7,7 @@ class ClientsController extends GetxController {
   final RxList<Client> clients = <Client>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
-  final RxBool showInactive = false.obs; // Nuevo: Mostrar clientes desactivados
+  final RxBool showInactive = false.obs;
 
   final RxList<Client> originalClients = <Client>[].obs;
 
@@ -15,8 +15,6 @@ class ClientsController extends GetxController {
   final RxString name = ''.obs;
   final RxString lastName = ''.obs;
   final RxString businessName = ''.obs;
-  final RxString bankAccount = ''.obs;
-  final RxString codeBank = ''.obs;
   final RxString affiliateCode = ''.obs;
   final RxString value = ''.obs;
 
@@ -33,8 +31,6 @@ class ClientsController extends GetxController {
       name: name.value,
       lastName: lastName.value,
       businessName: businessName.value,
-      bankAccount: bankAccount.value,
-      codeBank: codeBank.value,
       affiliateCode: affiliateCode.value,
       value: value.value,
       createdAt: DateTime.now(),
@@ -70,8 +66,6 @@ class ClientsController extends GetxController {
     name.value = '';
     lastName.value = '';
     businessName.value = '';
-    bankAccount.value = '';
-    codeBank.value = '';
     affiliateCode.value = '';
     value.value = '';
   }

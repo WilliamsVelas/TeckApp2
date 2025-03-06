@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/invoices_model.dart';
 import '../../../database/models/products_model.dart';
+import '../../../database/models/user_model.dart';
 
 class DashboardController extends GetxController {
   final RxList<Product> products = <Product>[].obs;

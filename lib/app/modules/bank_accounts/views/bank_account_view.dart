@@ -22,7 +22,10 @@ class BankAccountView extends GetView<BankAccountController> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: const Text(''),
+        title: Text(
+          'Cuentas de banco',
+          style: TextStyle(color: AppColors.principalWhite),
+        ),
       ),
       backgroundColor: AppColors.onPrincipalBackground,
       body: Column(
@@ -82,7 +85,7 @@ class BankAccountView extends GetView<BankAccountController> {
                         return const Center(
                           child: Text(
                             'No hay cuentas bancarias disponibles.',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black),
+                            style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
                           ),
                         );
                       }
