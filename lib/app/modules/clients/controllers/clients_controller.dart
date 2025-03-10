@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../database/database_helper.dart';
+import '../../../database/models/bank_account_model.dart';
 import '../../../database/models/clients_model.dart';
+import '../widgets/clients_card.dart';
 import '../widgets/clients_form.dart';
 
 class ClientsController extends GetxController {
@@ -13,6 +15,9 @@ class ClientsController extends GetxController {
   final RxString sortCriteria = ''.obs;
   final RxBool showInactive = false.obs;
   final RxList<Client> originalClients = <Client>[].obs;
+
+  final RxList<BankAccount> clientBankAccounts = <BankAccount>[].obs;
+  final RxBool isLoadingBankAccounts = false.obs;
 
   // Campos de Client
   final RxString name = ''.obs;
@@ -151,9 +156,15 @@ class ClientsController extends GetxController {
     final filtered = originalClients.where((client) {
       final matchesSearch = searchQuery.isEmpty ||
           client.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          client.lastName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          client.businessName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          client.affiliateCode.toLowerCase().contains(searchQuery.value.toLowerCase());
+          client.lastName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          client.businessName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          client.affiliateCode
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
       final matchesStatus = showInactive.value || client.isActive;
       return matchesSearch && matchesStatus;
     }).toList();
@@ -167,5 +178,41 @@ class ClientsController extends GetxController {
     }
 
     clients.value = filtered;
+  }
+
+  //banck accounts
+  Future<void> loadClientBankAccounts(int clientId) async {
+    try {
+      isLoadingBankAccounts.value = true;
+      final accounts = await dbHelper.getBankAccountsByClientId(clientId);
+      clientBankAccounts.assignAll(accounts);
+    } catch (e) {
+      print('Error cargando cuentas bancarias: $e');
+    } finally {
+      isLoadingBankAccounts.value = false;
+    }
+  }
+
+  void showBankAccountsModal(int clientId, BuildContext context) {
+    loadClientBankAccounts(clientId);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.principalBackground,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 8.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: BankAccountsModal(clientId: clientId),
+        );
+      },
+    );
   }
 }

@@ -1,11 +1,15 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../theme/colors.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/clients_model.dart';
 import '../../../database/models/invoice_lines_model.dart';
 import '../../../database/models/invoices_model.dart';
 import '../../../database/models/products_model.dart';
 import '../../../database/models/serials_model.dart';
+import '../widgets/invoice_card.dart';
 
 class InvoiceController extends GetxController {
   final RxList<Invoice> invoices = <Invoice>[].obs;
@@ -23,6 +27,9 @@ class InvoiceController extends GetxController {
 
   final RxList<Client> clients = <Client>[].obs;
   final Rx<Client?> selectedClient = Rx<Client?>(null);
+
+  final RxBool isLoadingInvoiceLines = false.obs;
+  final RxDouble invoiceTotal = 0.0.obs;
 
   final RxString documentNo = ''.obs;
   final RxString totalPayed = ''.obs;
@@ -218,5 +225,69 @@ class InvoiceController extends GetxController {
     }
 
     invoices.value = filtered;
+  }
+
+  Future<void> loadInvoiceLines(int invoiceId) async {
+    try {
+      isLoadingInvoiceLines.value = true;
+      final lines = await dbHelper.getInvoiceLinesByInvoiceId(invoiceId);
+      invoiceLines.assignAll(lines);
+      invoiceTotal.value = lines.fold(0.0, (sum, line) => sum + line.total);
+    } catch (e) {
+      print('Error cargando líneas de factura: $e');
+    } finally {
+      isLoadingInvoiceLines.value = false;
+    }
+  }
+
+  void showInvoiceDetailsModal(int invoiceId, BuildContext context) {
+    loadInvoiceLines(invoiceId);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.principalBackground,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.5,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 8.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Venta',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.principalWhite)),
+                  IconButton(
+                    icon: Icon(Icons.close, color: AppColors.principalGray),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              Container(
+                margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.principalWhite,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InvoiceDetailsModal(invoiceId: invoiceId),
+              ),
+            ],
+          ) ,
+        );
+      },
+    );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:teck_app/app/database/database_helper.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
+import '../../../../theme/colors.dart';
 import '../../../database/models/categories_model.dart';
 import '../../../database/models/providers_model.dart';
 import '../../../database/models/serials_model.dart';
+import '../views/product_card.dart';
 import '../views/product_form.dart';
 import '../views/product_view.dart';
 
@@ -24,6 +27,10 @@ class ProductController extends GetxController {
 
   final RxList<Category> categories = <Category>[].obs;
   final RxList<Provider> providers = <Provider>[].obs;
+
+  //Serials
+  final RxList<Serial> productSerials = <Serial>[].obs;
+  final RxBool isLoadingSerials = false.obs;
 
   // Selected Values
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
@@ -320,7 +327,6 @@ class ProductController extends GetxController {
       selectCategory(null);
     }
 
-
     try {
       final provider = providers.firstWhere((prov) => prov.id == product.providerId);
       selectProvider(provider);
@@ -329,7 +335,6 @@ class ProductController extends GetxController {
       selectProvider(null);
     }
 
-    // Cargar los seriales del producto
     final serialsList = await dbHelper.getSerialsByProductId(product.id!);
     hasSerials.value = serialsList.isNotEmpty;
 
@@ -338,8 +343,41 @@ class ProductController extends GetxController {
     } else {
       qtyController.text = serialsList.length.toString();
     }
-
-    // Navegar al formulario
     Get.to(() => ProductFormView());
+  }
+
+  Future<void> loadProductSerials(int productId) async {
+    try {
+      isLoadingSerials.value = true;
+      final serials = await dbHelper.getSerialsByProductId(productId);
+      productSerials.assignAll(serials);
+    } catch (e) {
+      print('Error cargando seriales: $e');
+    } finally {
+      isLoadingSerials.value = false;
+    }
+  }
+
+  void showSerialsProductModal(int productId, BuildContext context) {
+    loadProductSerials(productId);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.principalBackground,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 8.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SerialsModal(productId: productId),
+        );
+      },
+    );
   }
 }
