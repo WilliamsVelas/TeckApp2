@@ -6,6 +6,8 @@ import 'package:teck_app/app/database/models/products_model.dart';
 import '../../../database/models/categories_model.dart';
 import '../../../database/models/providers_model.dart';
 import '../../../database/models/serials_model.dart';
+import '../views/product_form.dart';
+import '../views/product_view.dart';
 
 class ProductController extends GetxController {
   final RxList<Product> products = <Product>[].obs;
@@ -35,12 +37,16 @@ class ProductController extends GetxController {
   final RxInt serialsQty = 0.obs;
   final RxInt providerId = 0.obs;
   final RxInt categoryId = 0.obs;
-  final RxBool isSerial = false.obs; // Nuevo flag para controlar seriales
+  final RxBool isSerial = false.obs;
+
+  final RxString editingProductId = ''.obs;
+
+  final RxBool hasSerials = false.obs;
 
   final dbHelper = DatabaseHelper();
 
   final newSerialController = TextEditingController();
-  final qtyController = TextEditingController(); // controlador para qty
+  final qtyController = TextEditingController();
 
   @override
   void onInit() {
@@ -121,49 +127,80 @@ class ProductController extends GetxController {
     }
 
     int parsedQty = 0;
-    if (isSerial.value) {
-      parsedQty = serials.length; // Cantidad de seriales
+    if (editingProductId.value.isEmpty) {
+
+      if (isSerial.value) {
+        parsedQty = serials.length;
+      } else {
+        try {
+          parsedQty = int.parse(qtyController.text);
+        } catch (e) {
+          print('Error al convertir la cantidad: $e');
+          return;
+        }
+      }
     } else {
-      try {
-        parsedQty = int.parse(qtyController.text); // Cantidad directa
-      } catch (e) {
-        print('Error al convertir la cantidad: $e');
-        return;
+
+      final productId = int.tryParse(editingProductId.value);
+      final product = products.firstWhere((p) => p.id == productId);
+      if (hasSerials.value) {
+        parsedQty = product.serialsQty;
+      } else {
+        try {
+          parsedQty = int.parse(qtyController.text);
+        } catch (e) {
+          print('Error al convertir la cantidad: $e');
+          return;
+        }
       }
     }
 
     final product = Product(
+      id: editingProductId.value.isNotEmpty ? int.tryParse(editingProductId.value) : null,
       name: name.value,
       code: code.value,
       price: parsedPrice,
-      serialsQty: parsedQty, // Usamos parsedQty según isSerial
+      serialsQty: parsedQty,
       refPrice: parsedPrice,
       minStock: parsedMinStock,
       categoryId: selectedCategory.value!.id!,
       providerId: selectedProvider.value!.id!,
-      createdAt: DateTime.now(),
+      createdAt: editingProductId.value.isEmpty
+          ? DateTime.now()
+          : products.firstWhere((p) => p.id == int.tryParse(editingProductId.value)).createdAt,
+      updatedAt: editingProductId.value.isNotEmpty ? DateTime.now() : null,
+      isActive: editingProductId.value.isEmpty
+          ? true
+          : products.firstWhere((p) => p.id == int.tryParse(editingProductId.value)).isActive,
     );
 
     try {
-      int productId = await dbHelper.insertProduct(product);
-      print('Producto guardado con ID: $productId');
+      if (editingProductId.value.isEmpty) {
+        int productId = await dbHelper.insertProduct(product);
+        print('Producto guardado con ID: $productId');
 
-      if (isSerial.value) {
-        for (var serialNumber in serials) {
-          Serial serial = Serial(
-            productId: productId,
-            serial: serialNumber,
-            createdAt: DateTime.now(),
-          );
-          await dbHelper.insertSerial(serial);
+        if (isSerial.value) {
+          for (var serialNumber in serials) {
+            Serial serial = Serial(
+              productId: productId,
+              serial: serialNumber,
+              createdAt: DateTime.now(),
+            );
+            await dbHelper.insertSerial(serial);
+          }
+          print('Seriales guardados para el producto $productId');
         }
-        print('Seriales guardados para el producto $productId');
+      } else {
+        // Edición
+        await dbHelper.updateProduct(product);
+        print('Producto actualizado con ID: ${product.id}');
       }
-
       fetchAllProducts();
+      clearFields();
+      editingProductId.value = '';
       Get.back();
     } catch (e) {
-      print('Error al guardar el producto y/o los seriales: $e');
+      print('Error al guardar/actualizar el producto: $e');
     }
   }
 
@@ -200,6 +237,8 @@ class ProductController extends GetxController {
     newSerialController.clear();
     qtyController.clear();
     isSerial.value = false;
+    editingProductId.value = '';
+    hasSerials.value = false;
   }
 
   void toggleShowInactive(bool value) {
@@ -256,5 +295,51 @@ class ProductController extends GetxController {
     }
 
     products.value = filtered;
+  }
+
+  Future<void> editProduct(Product product) async {
+    if (categories.isEmpty) {
+      await fetchAllCategories();
+    }
+    if (providers.isEmpty) {
+      await fetchAllProviders();
+    }
+
+    editingProductId.value = product.id.toString();
+    name.value = product.name;
+    code.value = product.code ?? '';
+    price.value = product.price.toString();
+    minStock.value = product.minStock.toString();
+    serialsQty.value = product.serialsQty;
+
+    try {
+      final category = categories.firstWhere((cat) => cat.id == product.categoryId);
+      selectCategory(category);
+    } catch (e) {
+      print('Categoría no encontrada para el producto: ${product.categoryId}');
+      selectCategory(null);
+    }
+
+
+    try {
+      final provider = providers.firstWhere((prov) => prov.id == product.providerId);
+      selectProvider(provider);
+    } catch (e) {
+      print('Proveedor no encontrado para el producto: ${product.providerId}');
+      selectProvider(null);
+    }
+
+    // Cargar los seriales del producto
+    final serialsList = await dbHelper.getSerialsByProductId(product.id!);
+    hasSerials.value = serialsList.isNotEmpty;
+
+    if (!hasSerials.value) {
+      qtyController.text = product.serialsQty.toString();
+    } else {
+      qtyController.text = serialsList.length.toString();
+    }
+
+    // Navegar al formulario
+    Get.to(() => ProductFormView());
   }
 }

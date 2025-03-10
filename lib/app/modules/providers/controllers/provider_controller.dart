@@ -1,21 +1,26 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../theme/colors.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/providers_model.dart';
+import '../widgets/provider_form.dart';
 
 class ProviderController extends GetxController {
   final RxList<Provider> providers = <Provider>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
-  final RxBool showInactive = false.obs; // Nuevo: Mostrar proveedores desactivados
-
+  final RxBool showInactive = false.obs;
   final RxList<Provider> originalProviders = <Provider>[].obs;
 
-  // Provider
+  // Campos de Provider
   final RxString name = ''.obs;
   final RxString lastName = ''.obs;
   final RxString businessName = ''.obs;
   final RxString value = ''.obs;
+
+  // Variable para rastrear el proveedor en edición
+  final RxString editingProviderId = ''.obs;
 
   final dbHelper = DatabaseHelper();
 
@@ -25,21 +30,68 @@ class ProviderController extends GetxController {
     fetchAllProviders();
   }
 
+  void openProviderForm(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.onPrincipalBackground,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: ProviderForm(),
+        );
+      },
+    );
+  }
+
+  void editProvider(Provider provider, BuildContext context) {
+    editingProviderId.value = provider.id.toString();
+    name.value = provider.name;
+    lastName.value = provider.lastName;
+    businessName.value = provider.businessName;
+    value.value = provider.value;
+    openProviderForm(context);
+  }
+
   Future<void> saveProvider() async {
+    final isEditing = editingProviderId.value.isNotEmpty;
+    final providerId = isEditing ? int.tryParse(editingProviderId.value) : null;
+
     final provider = Provider(
+      id: providerId,
       name: name.value,
       lastName: lastName.value,
       businessName: businessName.value,
       value: value.value,
-      createdAt: DateTime.now(),
+      createdAt: providerId == null
+          ? DateTime.now()
+          : providers.firstWhere((p) => p.id == providerId).createdAt,
+      updatedAt: providerId != null ? DateTime.now() : null,
+      isActive: providerId == null
+          ? true
+          : providers.firstWhere((p) => p.id == providerId).isActive,
     );
 
     try {
-      await dbHelper.insertProvider(provider);
+      if (providerId == null) {
+        await dbHelper.insertProvider(provider);
+      } else {
+        await dbHelper.updateProvider(provider);
+      }
       fetchAllProviders();
       clearFields();
+      editingProviderId.value = '';
+      // Get.back();
     } catch (e) {
-      print('Error al guardar el proveedor: $e');
+      print('Error al guardar/actualizar el proveedor: $e');
     }
   }
 
@@ -65,12 +117,13 @@ class ProviderController extends GetxController {
     lastName.value = '';
     businessName.value = '';
     value.value = '';
+    editingProviderId.value = '';
   }
 
   void fetchAllProviders() async {
     final List<Provider> allProviders = await dbHelper.getProviders();
-    providers.assignAll(allProviders.where((prov) => prov.isActive)); // Solo activos por defecto
-    originalProviders.assignAll(allProviders); // Todos, incluidos inactivos
+    providers.assignAll(allProviders.where((prov) => prov.isActive));
+    originalProviders.assignAll(allProviders);
     applyFilters();
   }
 
@@ -95,9 +148,7 @@ class ProviderController extends GetxController {
           (provider.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
           (provider.lastName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
           (provider.businessName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
-
       final matchesStatus = showInactive.value || provider.isActive;
-
       return matchesSearch && matchesStatus;
     }).toList();
 

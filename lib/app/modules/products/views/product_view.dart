@@ -230,8 +230,7 @@ class ProductFormView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
 
-    // Limpiar y cargar al entrar
-    productController.clearFields();
+    // productController.clearFields();
     productController.fetchAll();
 
     return WillPopScope(

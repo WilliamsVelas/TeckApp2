@@ -15,11 +15,11 @@ class ProviderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProviderController controller = Get.find<ProviderController>();
-    RxBool isExpanded = false.obs; // Estado para controlar expansión
+    RxBool isExpanded = false.obs;
 
     return Obx(
           () => GestureDetector(
-        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+        onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
           elevation: 3,
@@ -52,7 +52,7 @@ class ProviderCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      provider.isActive ? 'Activo' : 'Inactivo', // Mostrar estado
+                      provider.isActive ? 'Activo' : 'Inactivo',
                       style: TextStyle(
                         fontSize: 12,
                         color: provider.isActive ? Colors.green : Colors.red,
@@ -69,7 +69,7 @@ class ProviderCard extends StatelessWidget {
                     color: AppColors.principalWhite,
                   ),
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -77,15 +77,28 @@ class ProviderCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
+                            Icons.edit,
+                            color: AppColors.warning,
+                          ),
+                          onPressed: provider.isActive
+                              ? () {
+                            controller.editProvider(provider, context);
+                            isExpanded.value = false;
+                          }
+                              : null,
+                        ),
+
+                        IconButton(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: AppColors.invalid,
                           ),
                           onPressed: provider.isActive
                               ? () {
                             controller.deactivateProvider(provider.id!);
-                            isExpanded.value = false; // Contraer al desactivar
+                            isExpanded.value = false;
                           }
-                              : null, // Deshabilitar si ya está inactivo
+                              : null,
                         ),
                       ],
                     ),

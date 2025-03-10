@@ -241,7 +241,7 @@ class DatabaseHelper {
   Future<int> desactiveProduct(Product product) async {
     final db = await database;
     product.updatedAt = DateTime.now();
-    product.isActive = false; // Desactivar producto
+    product.isActive = false;
     return await db.update(
       'products',
       product.toMap(),
@@ -484,6 +484,16 @@ class DatabaseHelper {
     return await db.insert('serials', serial.toMap());
   }
 
+  Future<int> updateSerial(Serial serial) async {
+    final db = await database;
+    return await db.update(
+      'serials',
+      serial.toMap(),
+      where: 'id = ?',
+      whereArgs: [serial.id],
+    );
+  }
+
   Future<int> deleteSerial(int id) async {
     final db = await database;
     return await db.update(
@@ -491,7 +501,7 @@ class DatabaseHelper {
       {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
-    ); // Cambiamos a desactivar en lugar de eliminar
+    );
   }
 
   // Invoices
@@ -589,7 +599,7 @@ class DatabaseHelper {
       {'isActive': 0, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
-    ); // Cambiamos a desactivar en lugar de eliminar
+    );
   }
 
 // BankAccounts

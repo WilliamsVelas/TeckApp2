@@ -15,11 +15,11 @@ class BankAccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final BankAccountController controller = Get.find<BankAccountController>();
-    RxBool isExpanded = false.obs; // Estado para controlar expansión
+    RxBool isExpanded = false.obs;
 
     return Obx(
           () => GestureDetector(
-        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+        onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
           elevation: 3,
@@ -53,7 +53,7 @@ class BankAccountCard extends StatelessWidget {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          bankAccount.isActive ? 'Activo' : 'Inactivo', // Mostrar estado
+                          bankAccount.isActive ? 'Activo' : 'Inactivo',
                           style: TextStyle(
                             fontSize: 12,
                             color: bankAccount.isActive ? Colors.green : Colors.red,
@@ -64,7 +64,6 @@ class BankAccountCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 4),
-                // Client Name
                 FutureBuilder<String>(
                   future: controller.getClientName(bankAccount.clientId),
                   builder: (context, snapshot) {
@@ -85,7 +84,7 @@ class BankAccountCard extends StatelessWidget {
                     }
                   },
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -93,15 +92,27 @@ class BankAccountCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
+                            Icons.edit,
+                            color: AppColors.warning,
+                          ),
+                          onPressed: bankAccount.isActive
+                              ? () {
+                            controller.editBankAccount(bankAccount, context);
+                            isExpanded.value = false;
+                          }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: AppColors.invalid,
                           ),
                           onPressed: bankAccount.isActive
                               ? () {
                             controller.deactivateBankAccount(bankAccount.id!);
-                            isExpanded.value = false; // Contraer al desactivar
+                            isExpanded.value = false;
                           }
-                              : null, // Deshabilitar si ya está inactivo
+                              : null,
                         ),
                       ],
                     ),

@@ -1,19 +1,25 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../theme/colors.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/categories_model.dart';
+import '../widgets/categories_form.dart';
 
 class CategoriesController extends GetxController {
   final RxList<Category> categories = <Category>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
-  final RxBool showInactive = false.obs; // Nuevo: Mostrar categorías desactivadas
-
+  final RxBool showInactive = false.obs;
   final RxList<Category> originalCategories = <Category>[].obs;
 
-  // Category
+  // Campos de categoría
   final RxString name = ''.obs;
   final RxString? code = ''.obs;
+
+  // Variable para rastrear la categoría en edición
+  final RxString editingCategoryId = ''.obs;
 
   final dbHelper = DatabaseHelper();
 
@@ -23,19 +29,64 @@ class CategoriesController extends GetxController {
     fetchAllCategories();
   }
 
+  void openCategoryForm(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.onPrincipalBackground,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: CategoryForm(),
+        );
+      },
+    );
+  }
+
+  void editCategory(Category category, BuildContext context) {
+    editingCategoryId.value = category.id.toString();
+    name.value = category.name;
+    code?.value = category.code ?? '';
+    openCategoryForm(context);
+  }
+
   Future<void> saveCategory() async {
+    final isEditing = editingCategoryId.value.isNotEmpty;
+    final categoryId = isEditing ? int.tryParse(editingCategoryId.value) : null;
+
     final category = Category(
+      id: categoryId,
       name: name.value,
-      code: code?.value,
-      createdAt: DateTime.now(),
+      code: code?.value?.isEmpty ?? true ? null : code?.value,
+      createdAt: categoryId == null
+          ? DateTime.now()
+          : categories.firstWhere((cat) => cat.id == categoryId).createdAt,
+      updatedAt: categoryId != null ? DateTime.now() : null,
+      isActive: categoryId == null
+          ? true
+          : categories.firstWhere((cat) => cat.id == categoryId).isActive,
     );
 
     try {
-      await dbHelper.insertCategory(category);
+      if (categoryId == null) {
+        await dbHelper.insertCategory(category);
+      } else {
+        await dbHelper.updateCategory(category);
+      }
       fetchAllCategories();
       clearFields();
+      editingCategoryId.value = '';
+      // Get.back();
     } catch (e) {
-      print('Error al guardar la categoría: $e');
+      print('Error al guardar/actualizar la categoría: $e');
     }
   }
 
@@ -46,7 +97,7 @@ class CategoriesController extends GetxController {
         category.isActive = false;
         category.updatedAt = DateTime.now();
         await dbHelper.updateCategory(category);
-        fetchAllCategories(); // Recargar categorías después de desactivar
+        fetchAllCategories();
         print('Categoría desactivada con ID: $categoryId');
       } else {
         print('Categoría con ID $categoryId no encontrada');
@@ -59,12 +110,13 @@ class CategoriesController extends GetxController {
   void clearFields() {
     name.value = '';
     code?.value = '';
+    editingCategoryId.value = '';
   }
 
   Future<void> fetchAllCategories() async {
     final List<Category> allCategories = await dbHelper.getCategories();
-    categories.assignAll(allCategories.where((cat) => cat.isActive)); // Solo activas por defecto
-    originalCategories.assignAll(allCategories); // Todas, incluidas inactivas
+    categories.assignAll(allCategories.where((cat) => cat.isActive));
+    originalCategories.assignAll(allCategories);
     applyFilters();
   }
 
@@ -88,10 +140,7 @@ class CategoriesController extends GetxController {
       final matchesSearch = searchQuery.isEmpty ||
           category.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           (category.code?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
-
-      // Filtrar por estado activo/inactivo según showInactive
       final matchesStatus = showInactive.value || category.isActive;
-
       return matchesSearch && matchesStatus;
     }).toList();
 

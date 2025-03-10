@@ -1,26 +1,27 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../theme/colors.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/bank_account_model.dart';
 import '../../../database/models/clients_model.dart';
+import '../widgets/bank_account_form.dart';
 
 class BankAccountController extends GetxController {
-  // Observables for BankAccounts
+  // Observables existentes
   final RxList<BankAccount> bankAccounts = <BankAccount>[].obs;
-  final RxString searchQuery = ''.obs; // Añadido para filtros futuros
-  final RxString sortCriteria = ''.obs; // Añadido para filtros futuros
-  final RxBool showInactive = false.obs; // Nuevo: Mostrar cuentas desactivadas
-
-  // Client
+  final RxString searchQuery = ''.obs;
+  final RxString sortCriteria = ''.obs;
+  final RxBool showInactive = false.obs;
   final RxList<Client> clients = <Client>[].obs;
   final Rx<Client?> selectedClient = Rx<Client?>(null);
-
-  // BankAccount Fields
   final RxString bankName = ''.obs;
   final RxString numberAccount = ''.obs;
   final RxString code = ''.obs;
 
-  // DAO
+  final RxString editingBankAccountId = RxString('');
+
   final dbHelper = DatabaseHelper();
 
   @override
@@ -34,29 +35,70 @@ class BankAccountController extends GetxController {
     selectedClient.value = client;
   }
 
-  // CRUD
+  void editBankAccount(BankAccount bankAccount, BuildContext context) {
+    editingBankAccountId.value = bankAccount.id.toString();
+    bankName.value = bankAccount.bankName;
+    numberAccount.value = bankAccount.numberAccount;
+    code.value = bankAccount.code;
+    selectedClient.value = clients.firstWhere((client) => client.id == bankAccount.clientId);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.onPrincipalBackground,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: BankAccountForm(),
+        );
+      },
+    );
+  }
+
   Future<void> saveBankAccount() async {
-    // 1. Validate Data
     if (selectedClient.value == null) {
       // Get.snackbar('Error', 'Por favor, selecciona un Cliente.', backgroundColor: Colors.red);
       return;
     }
-    // 2. Create bankAccount
+
+    final isEditing = editingBankAccountId.value.isNotEmpty;
+    final bankAccountId = isEditing ? int.tryParse(editingBankAccountId.value) : null;
+
     final bankAccount = BankAccount(
+      id: bankAccountId,
       bankName: bankName.value,
       numberAccount: numberAccount.value,
       code: code.value,
       clientId: selectedClient.value!.id!,
-      createdAt: DateTime.now(),
+      createdAt: bankAccountId == null
+          ? DateTime.now()
+          : bankAccounts.firstWhere((ba) => ba.id == bankAccountId).createdAt,
+      updatedAt: bankAccountId != null ? DateTime.now() : null,
+      isActive: bankAccountId == null
+          ? true
+          : bankAccounts.firstWhere((ba) => ba.id == bankAccountId).isActive,
     );
 
     try {
-      await dbHelper.insertBankAccount(bankAccount);
+      if (bankAccountId == null) {
+        await dbHelper.insertBankAccount(bankAccount);
+      } else {
+        await dbHelper.updateBankAccount(bankAccount);
+      }
       fetchAllBankAccounts();
       clearFields();
-      Get.back();
+      editingBankAccountId.value = '';
+      // Get.back();
     } catch (e) {
-      print('Error al guardar la cuenta bancaria: $e');
+      print('Error al guardar/actualizar la cuenta bancaria: $e');
     }
   }
 
@@ -69,8 +111,6 @@ class BankAccountController extends GetxController {
         await dbHelper.updateBankAccount(bankAccount);
         fetchAllBankAccounts();
         print('Cuenta bancaria desactivada con ID: $bankAccountId');
-      } else {
-        print('Cuenta bancaria con ID $bankAccountId no encontrada');
       }
     } catch (e) {
       print('Error al desactivar la cuenta bancaria: $e');
@@ -82,13 +122,12 @@ class BankAccountController extends GetxController {
     numberAccount.value = '';
     code.value = '';
     selectedClient.value = null;
+    editingBankAccountId.value = '';
   }
 
   void fetchAllBankAccounts() async {
     final List<BankAccount> allBankAccounts = await dbHelper.getBankAccounts();
-    bankAccounts.assignAll(allBankAccounts.where((ba) => ba.isActive)); // Solo activas por defecto
-    // Si necesitas todas las cuentas para filtros futuros:
-    // originalBankAccounts.assignAll(allBankAccounts);
+    bankAccounts.assignAll(allBankAccounts.where((ba) => ba.isActive));
     applyFilters();
   }
 
@@ -120,9 +159,15 @@ class BankAccountController extends GetxController {
   void applyFilters() {
     final filtered = bankAccounts.where((bankAccount) {
       final matchesSearch = searchQuery.isEmpty ||
-          bankAccount.bankName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          bankAccount.numberAccount.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          bankAccount.code.toLowerCase().contains(searchQuery.value.toLowerCase());
+          bankAccount.bankName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          bankAccount.numberAccount
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          bankAccount.code
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
 
       final matchesStatus = showInactive.value || bankAccount.isActive;
 

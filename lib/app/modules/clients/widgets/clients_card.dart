@@ -18,8 +18,9 @@ class ClientCard extends StatelessWidget {
     RxBool isExpanded = false.obs; // Estado para controlar expansión
 
     return Obx(
-          () => GestureDetector(
-        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+      () => GestureDetector(
+        onTap: () => isExpanded.value = !isExpanded.value,
+        // Alternar expansión
         child: Card(
           color: AppColors.onPrincipalBackground,
           elevation: 3,
@@ -51,7 +52,8 @@ class ClientCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      client.isActive ? 'Activo' : 'Inactivo', // Mostrar estado
+                      client.isActive ? 'Activo' : 'Inactivo',
+                      // Mostrar estado
                       style: TextStyle(
                         fontSize: 12,
                         color: client.isActive ? Colors.green : Colors.red,
@@ -71,16 +73,16 @@ class ClientCard extends StatelessWidget {
                         color: AppColors.principalWhite,
                       ),
                     ),
-                    Text(
-                      '${client.affiliateCode}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.principalGray,
-                      ),
-                    ),
+                    // Text(
+                    //   '${client.affiliateCode}',
+                    //   style: TextStyle(
+                    //     fontSize: 14,
+                    //     color: AppColors.principalGray,
+                    //   ),
+                    // ),
                   ],
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -88,15 +90,28 @@ class ClientCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
+                            Icons.edit,
+                            color: AppColors.warning,
                           ),
                           onPressed: client.isActive
                               ? () {
-                            controller.deactivateClient(client.id!);
-                            isExpanded.value = false; // Contraer al desactivar
-                          }
-                              : null, // Deshabilitar si ya está inactivo
+                                  controller.editClient(client, context);
+                                  isExpanded.value = false;
+                                }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: AppColors.invalid,
+                          ),
+                          onPressed: client.isActive
+                              ? () {
+                                  controller.deactivateClient(client.id!);
+                                  isExpanded.value =
+                                      false;
+                                }
+                              : null,
                         ),
                       ],
                     ),

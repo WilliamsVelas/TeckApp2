@@ -15,11 +15,11 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CategoriesController controller = Get.find<CategoriesController>();
-    RxBool isExpanded = false.obs; // Estado para controlar expansión
+    RxBool isExpanded = false.obs;
 
     return Obx(
           () => GestureDetector(
-        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+        onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
           elevation: 3,
@@ -42,7 +42,7 @@ class CategoryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      category.isActive ? 'Activa' : 'Inactiva', // Mostrar estado
+                      category.isActive ? 'Activa' : 'Inactiva',
                       style: TextStyle(
                         fontSize: 12,
                         color: category.isActive ? Colors.green : Colors.red,
@@ -59,7 +59,7 @@ class CategoryCard extends StatelessWidget {
                     color: AppColors.principalWhite,
                   ),
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -67,15 +67,27 @@ class CategoryCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
+                            Icons.edit,
+                            color: AppColors.warning,
+                          ),
+                          onPressed: category.isActive
+                              ? () {
+                            controller.editCategory(category, context);
+                            isExpanded.value = false;
+                          }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: AppColors.invalid,
                           ),
                           onPressed: category.isActive
                               ? () {
                             controller.deactivateCategory(category.id!);
-                            isExpanded.value = false; // Contraer al desactivar
+                            isExpanded.value = false;
                           }
-                              : null, // Deshabilitar si ya está inactiva
+                              : null,
                         ),
                       ],
                     ),

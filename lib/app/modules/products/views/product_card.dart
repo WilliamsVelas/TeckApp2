@@ -15,11 +15,11 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
-    RxBool isExpanded = false.obs; // Estado para controlar expansión
+    RxBool isExpanded = false.obs;
 
     return Obx(
           () => GestureDetector(
-        onTap: () => isExpanded.value = !isExpanded.value, // Alternar expansión
+        onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: product.serialsQty <= product.minStock
               ? AppColors.backgroundMinStock
@@ -105,7 +105,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -113,15 +113,27 @@ class ProductCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
+                            Icons.edit,
+                            color: AppColors.warning,
+                          ),
+                          onPressed: product.isActive
+                              ? () {
+                            controller.editProduct(product);
+                            isExpanded.value = false;
+                          }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: AppColors.invalid,
                           ),
                           onPressed: product.isActive
                               ? () {
                             controller.deactivateProduct(product.id!);
-                            isExpanded.value = false; // Contraer al desactivar
+                            isExpanded.value = false;
                           }
-                              : null, // Deshabilitar si ya está inactivo
+                              : null,
                         ),
                       ],
                     ),

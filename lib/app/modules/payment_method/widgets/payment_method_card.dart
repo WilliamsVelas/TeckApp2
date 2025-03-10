@@ -42,7 +42,7 @@ class PaymentMethodCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      paymentMethod.isActive ? 'Activo' : 'Inactivo', // Mostrar estado
+                      paymentMethod.isActive ? 'Activo' : 'Inactivo',
                       style: TextStyle(
                         fontSize: 12,
                         color: paymentMethod.isActive ? Colors.green : Colors.red,
@@ -59,7 +59,7 @@ class PaymentMethodCard extends StatelessWidget {
                     color: AppColors.principalWhite,
                   ),
                 ),
-                if (isExpanded.value) // Mostrar íconos cuando está expandido
+                if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
@@ -67,8 +67,21 @@ class PaymentMethodCard extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(
+                            Icons.edit,
+                            color: AppColors.warning,
+                          ),
+                          onPressed: paymentMethod.isActive
+                              ? () {
+                            controller.editPaymentMethod(paymentMethod, context);
+                            isExpanded.value = false;
+                          }
+                              : null,
+                        ),
+
+                        IconButton(
+                          icon: Icon(
                             Icons.delete,
-                            color: Colors.red,
+                            color: AppColors.invalid,
                           ),
                           onPressed: paymentMethod.isActive
                               ? () {
