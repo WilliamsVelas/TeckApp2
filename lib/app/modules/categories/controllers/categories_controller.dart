@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/categories_model.dart';
 import '../widgets/categories_form.dart';
@@ -78,15 +79,32 @@ class CategoriesController extends GetxController {
     try {
       if (categoryId == null) {
         await dbHelper.insertCategory(category);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Categoria guardada correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
         await dbHelper.updateCategory(category);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Categoria editada correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       }
       fetchAllCategories();
       clearFields();
       editingCategoryId.value = '';
       // Get.back();
     } catch (e) {
-      print('Error al guardar/actualizar la categoría: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 

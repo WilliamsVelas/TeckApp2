@@ -16,4 +16,11 @@ class AppColors {
   static const invalid = Color(0xFFFD575A);
   static const warning = Color(0xFFFDDC57);
   static const backgroundMinStock = Color(0xFF994042);
+
+  //Notifications
+  static const inProgress = Color(0xFF38B6DE);
+
+  //Fonts
+  static const principalBlackFont = Color(0xFF1E1E1E);
+  static const principalGrayFont = Color(0xFF666666);
 }

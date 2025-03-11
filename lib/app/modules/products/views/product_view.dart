@@ -229,10 +229,7 @@ class ProductFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
-
     // productController.clearFields();
-    productController.fetchAll();
-
     return WillPopScope(
       onWillPop: () async {
         productController.clearFields();

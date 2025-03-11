@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/payment_method_model.dart';
 import '../widgets/payment_method_form.dart';
@@ -54,12 +55,14 @@ class PaymentMethodController extends GetxController {
     editingPaymentMethodId.value = paymentMethod.id.toString();
     name.value = paymentMethod.name;
     code.value = paymentMethod.code;
-    openPaymentMethodForm(context); // Abrir el formulario con los datos cargados
+    openPaymentMethodForm(
+        context); // Abrir el formulario con los datos cargados
   }
 
   Future<void> savePaymentMethod() async {
     final isEditing = editingPaymentMethodId.value.isNotEmpty;
-    final paymentMethodId = isEditing ? int.tryParse(editingPaymentMethodId.value) : null;
+    final paymentMethodId =
+        isEditing ? int.tryParse(editingPaymentMethodId.value) : null;
 
     final paymentMethod = PaymentMethod(
       id: paymentMethodId,
@@ -67,30 +70,52 @@ class PaymentMethodController extends GetxController {
       code: code.value,
       createdAt: paymentMethodId == null
           ? DateTime.now()
-          : paymentMethods.firstWhere((pm) => pm.id == paymentMethodId).createdAt,
+          : paymentMethods
+              .firstWhere((pm) => pm.id == paymentMethodId)
+              .createdAt,
       updatedAt: DateTime.now(),
       isActive: paymentMethodId == null
           ? true
-          : paymentMethods.firstWhere((pm) => pm.id == paymentMethodId).isActive,
+          : paymentMethods
+              .firstWhere((pm) => pm.id == paymentMethodId)
+              .isActive,
     );
 
     try {
       if (paymentMethodId == null) {
         await dbHelper.insertPaymentMethod(paymentMethod);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Metodo de pago guardado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
         await dbHelper.updatePaymentMethod(paymentMethod);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Metodo de pago editado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       }
       fetchAllPaymentMethods();
       clearFields();
       editingPaymentMethodId.value = '';
     } catch (e) {
-      print('Error al guardar/actualizar el método de pago: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 
   Future<void> deactivatePaymentMethod(int paymentMethodId) async {
     try {
-      final paymentMethod = await dbHelper.getPaymentMethodById(paymentMethodId);
+      final paymentMethod =
+          await dbHelper.getPaymentMethodById(paymentMethodId);
       if (paymentMethod != null) {
         paymentMethod.isActive = false;
         paymentMethod.updatedAt = DateTime.now();
@@ -112,7 +137,8 @@ class PaymentMethodController extends GetxController {
   }
 
   void fetchAllPaymentMethods() async {
-    final List<PaymentMethod> allPaymentMethods = await dbHelper.getPaymentMethods();
+    final List<PaymentMethod> allPaymentMethods =
+        await dbHelper.getPaymentMethods();
     paymentMethods.assignAll(allPaymentMethods.where((pm) => pm.isActive));
     originalPaymentMethods.assignAll(allPaymentMethods);
     applyFilters();
@@ -136,8 +162,12 @@ class PaymentMethodController extends GetxController {
   void applyFilters() {
     var filtered = originalPaymentMethods.where((paymentMethod) {
       final matchesSearch = searchQuery.isEmpty ||
-          paymentMethod.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          paymentMethod.code.toLowerCase().contains(searchQuery.value.toLowerCase());
+          paymentMethod.name
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          paymentMethod.code
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
       final matchesStatus = showInactive.value || paymentMethod.isActive;
       return matchesSearch && matchesStatus;
     }).toList();

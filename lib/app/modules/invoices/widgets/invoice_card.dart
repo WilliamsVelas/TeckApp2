@@ -246,24 +246,29 @@ class InvoiceLineItem extends StatelessWidget {
                 ),
               ),
             ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '\$${line.productPrice.toStringAsFixed(2)} x (${line.qty})',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
             Text(
               '\$${(line.total).toStringAsFixed(2)}',
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.grey[600],
               ),
             ),
           ],
         ),
         SizedBox(height: 4),
-        Text(
-          '\$${line.productPrice.toStringAsFixed(2)}',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
       ],
     );
   }

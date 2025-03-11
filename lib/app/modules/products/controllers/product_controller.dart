@@ -5,6 +5,7 @@ import 'package:teck_app/app/database/database_helper.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/models/categories_model.dart';
 import '../../../database/models/providers_model.dart';
 import '../../../database/models/serials_model.dart';
@@ -41,6 +42,13 @@ class ProductController extends GetxController {
   final RxString code = ''.obs;
   final RxString price = ''.obs;
   final RxString minStock = ''.obs;
+  // Controladores de texto
+  final nameController = TextEditingController();
+  final codeController = TextEditingController();
+  final priceController = TextEditingController();
+  final minStockController = TextEditingController();
+  final newSerialController = TextEditingController();
+  final qtyController = TextEditingController();
   final RxInt serialsQty = 0.obs;
   final RxInt providerId = 0.obs;
   final RxInt categoryId = 0.obs;
@@ -52,13 +60,21 @@ class ProductController extends GetxController {
 
   final dbHelper = DatabaseHelper();
 
-  final newSerialController = TextEditingController();
-  final qtyController = TextEditingController();
-
   @override
   void onInit() {
     super.onInit();
     fetchAllProducts();
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    codeController.dispose();
+    priceController.dispose();
+    minStockController.dispose();
+    qtyController.dispose();
+    newSerialController.dispose();
+    super.onClose();
   }
 
   void fetchAll() {
@@ -117,68 +133,22 @@ class ProductController extends GetxController {
       print('Proveedor no seleccionado');
       return;
     }
-    double parsedPrice = 0.0;
-    try {
-      parsedPrice = double.parse(price.value);
-    } catch (e) {
-      print('Error al convertir el precio: $e');
-      return;
-    }
-
-    int parsedMinStock = 0;
-    try {
-      parsedMinStock = int.parse(minStock.value);
-    } catch (e) {
-      print('Error al convertir el stock mínimo: $e');
-      return;
-    }
-
-    int parsedQty = 0;
-    if (editingProductId.value.isEmpty) {
-
-      if (isSerial.value) {
-        parsedQty = serials.length;
-      } else {
-        try {
-          parsedQty = int.parse(qtyController.text);
-        } catch (e) {
-          print('Error al convertir la cantidad: $e');
-          return;
-        }
-      }
-    } else {
-
-      final productId = int.tryParse(editingProductId.value);
-      final product = products.firstWhere((p) => p.id == productId);
-      if (hasSerials.value) {
-        parsedQty = product.serialsQty;
-      } else {
-        try {
-          parsedQty = int.parse(qtyController.text);
-        } catch (e) {
-          print('Error al convertir la cantidad: $e');
-          return;
-        }
-      }
-    }
 
     final product = Product(
-      id: editingProductId.value.isNotEmpty ? int.tryParse(editingProductId.value) : null,
-      name: name.value,
-      code: code.value,
-      price: parsedPrice,
-      serialsQty: parsedQty,
-      refPrice: parsedPrice,
-      minStock: parsedMinStock,
+      id: editingProductId.value.isEmpty
+          ? null
+          : int.parse(editingProductId.value),
+      name: nameController.text,
+      code: codeController.text,
+      price: double.tryParse(priceController.text) ?? 0.0,
+      serialsQty: isSerial.value
+          ? serials.length
+          : int.tryParse(qtyController.text) ?? 0,
+      minStock: int.tryParse(minStockController.text) ?? 0,
       categoryId: selectedCategory.value!.id!,
       providerId: selectedProvider.value!.id!,
-      createdAt: editingProductId.value.isEmpty
-          ? DateTime.now()
-          : products.firstWhere((p) => p.id == int.tryParse(editingProductId.value)).createdAt,
-      updatedAt: editingProductId.value.isNotEmpty ? DateTime.now() : null,
-      isActive: editingProductId.value.isEmpty
-          ? true
-          : products.firstWhere((p) => p.id == int.tryParse(editingProductId.value)).isActive,
+      createdAt: DateTime.now(),
+      isActive: true,
     );
 
     try {
@@ -197,17 +167,33 @@ class ProductController extends GetxController {
           }
           print('Seriales guardados para el producto $productId');
         }
+        Get.back();
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Producto guardado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
-        // Edición
         await dbHelper.updateProduct(product);
-        print('Producto actualizado con ID: ${product.id}');
+        Get.back();
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Producto editado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       }
       fetchAllProducts();
       clearFields();
       editingProductId.value = '';
-      Get.back();
     } catch (e) {
-      print('Error al guardar/actualizar el producto: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 
@@ -229,10 +215,12 @@ class ProductController extends GetxController {
   }
 
   void clearFields() {
-    name.value = '';
-    code.value = '';
-    price.value = '';
-    minStock.value = '';
+    nameController.dispose();
+    codeController.dispose();
+    priceController.dispose();
+    minStockController.dispose();
+    qtyController.dispose();
+    newSerialController.dispose();
     providerId.value = 0;
     categoryId.value = 0;
     serials.clear();
@@ -283,10 +271,16 @@ class ProductController extends GetxController {
   void applyFilters() {
     final filtered = originalProducts.where((product) {
       final matchesSearch = searchQuery.isEmpty ||
-          product.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          (product.code?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
+          product.name
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          (product.code
+                  ?.toLowerCase()
+                  .contains(searchQuery.value.toLowerCase()) ??
+              false);
 
-      final matchesProvider = selectedProviderId.value == 0 || product.providerId == selectedProviderId.value;
+      final matchesProvider = selectedProviderId.value == 0 ||
+          product.providerId == selectedProviderId.value;
 
       final matchesStatus = showInactive.value || product.isActive;
 
@@ -305,44 +299,22 @@ class ProductController extends GetxController {
   }
 
   Future<void> editProduct(Product product) async {
-    if (categories.isEmpty) {
-      await fetchAllCategories();
-    }
-    if (providers.isEmpty) {
-      await fetchAllProviders();
-    }
-
     editingProductId.value = product.id.toString();
-    name.value = product.name;
-    code.value = product.code ?? '';
-    price.value = product.price.toString();
-    minStock.value = product.minStock.toString();
-    serialsQty.value = product.serialsQty;
+    nameController.text = product.name;
+    codeController.text = product.code ?? '';
+    priceController.text = product.price.toString();
+    minStockController.text = product.minStock.toString();
+    qtyController.text = product.serialsQty.toString();
 
-    try {
-      final category = categories.firstWhere((cat) => cat.id == product.categoryId);
-      selectCategory(category);
-    } catch (e) {
-      print('Categoría no encontrada para el producto: ${product.categoryId}');
-      selectCategory(null);
-    }
-
-    try {
-      final provider = providers.firstWhere((prov) => prov.id == product.providerId);
-      selectProvider(provider);
-    } catch (e) {
-      print('Proveedor no encontrado para el producto: ${product.providerId}');
-      selectProvider(null);
-    }
+    selectCategory(categories.firstWhereOrNull((c) => c.id == product.categoryId));
+    selectProvider(providers.firstWhereOrNull((p) => p.id == product.providerId));
 
     final serialsList = await dbHelper.getSerialsByProductId(product.id!);
     hasSerials.value = serialsList.isNotEmpty;
-
-    if (!hasSerials.value) {
-      qtyController.text = product.serialsQty.toString();
-    } else {
-      qtyController.text = serialsList.length.toString();
+    if (hasSerials.value) {
+      serials.assignAll(serialsList.map((s) => s.serial));
     }
+
     Get.to(() => ProductFormView());
   }
 

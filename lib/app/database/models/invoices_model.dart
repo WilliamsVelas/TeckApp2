@@ -6,7 +6,6 @@ class Invoice {
   double totalPayed;
   double? refTotalAmount;
   double? refTotalPayed;
-  int qty;
   int clientId;
   DateTime createdAt;
   DateTime? updatedAt;
@@ -20,7 +19,6 @@ class Invoice {
     required this.totalPayed,
     this.refTotalAmount,
     this.refTotalPayed,
-    required this.qty,
     required this.clientId,
     required this.createdAt,
     this.updatedAt,
@@ -36,7 +34,6 @@ class Invoice {
       'totalPayed': totalPayed,
       'refTotalAmount': refTotalAmount,
       'refTotalPayed': refTotalPayed,
-      'qty': qty,
       'clientId': clientId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -53,7 +50,6 @@ class Invoice {
       totalPayed: map['totalPayed'] as double,
       refTotalAmount: map['refTotalAmount'] as double?,
       refTotalPayed: map['refTotalPayed'] as double?,
-      qty: map['qty'] as int,
       clientId: map['clientId'] as int,
       createdAt: DateTime.parse(map['createdAt'] as String),
       updatedAt: map['updatedAt'] != null

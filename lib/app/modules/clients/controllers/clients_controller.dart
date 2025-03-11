@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/bank_account_model.dart';
 import '../../../database/models/clients_model.dart';
@@ -92,15 +93,32 @@ class ClientsController extends GetxController {
     try {
       if (clientId == null) {
         await dbHelper.insertClient(client);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Cliente guardado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
         await dbHelper.updateClient(client);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Cliente editado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       }
       fetchAllClients();
       clearFields();
       editingClientId.value = '';
       // Get.back();
     } catch (e) {
-      print('Error al guardar/actualizar el cliente: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 
@@ -187,7 +205,12 @@ class ClientsController extends GetxController {
       final accounts = await dbHelper.getBankAccountsByClientId(clientId);
       clientBankAccounts.assignAll(accounts);
     } catch (e) {
-      print('Error cargando cuentas bancarias: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Error al cargar cuentas bancarias.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     } finally {
       isLoadingBankAccounts.value = false;
     }

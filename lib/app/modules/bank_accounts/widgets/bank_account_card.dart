@@ -10,7 +10,8 @@ import '../controller/bank_account_controller.dart';
 class BankAccountCard extends StatelessWidget {
   final BankAccount bankAccount;
 
-  const BankAccountCard({Key? key, required this.bankAccount}) : super(key: key);
+  const BankAccountCard({Key? key, required this.bankAccount})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class BankAccountCard extends StatelessWidget {
     RxBool isExpanded = false.obs;
 
     return Obx(
-          () => GestureDetector(
+      () => GestureDetector(
         onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
@@ -34,56 +35,56 @@ class BankAccountCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    FutureBuilder<String>(
+                      future: controller.getClientName(bankAccount.clientId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.principalGray,
+                            ),
+                          );
+                        } else {
+                          return Text(
+                            'Cargando...',
+                            style: TextStyle(color: AppColors.principalGray),
+                          );
+                        }
+                      },
+                    ),
+                    Text(
+                      bankAccount.isActive ? 'Activo' : 'Inactivo',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: bankAccount.isActive ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Text(
                       '${bankAccount.code}-${bankAccount.numberAccount}',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.principalGray,
+                        fontSize: 16,
+                        color: AppColors.principalWhite,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          bankAccount.bankName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.principalGray,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          bankAccount.isActive ? 'Activo' : 'Inactivo',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: bankAccount.isActive ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      bankAccount.bankName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.principalGray,
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: 4),
-                FutureBuilder<String>(
-                  future: controller.getClientName(bankAccount.clientId),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(
-                        snapshot.data!,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.principalWhite,
-                        ),
-                      );
-                    } else {
-                      return Text(
-                        'Cargando...',
-                        style: TextStyle(color: AppColors.principalGray),
-                      );
-                    }
-                  },
-                ),
                 if (isExpanded.value)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -97,9 +98,10 @@ class BankAccountCard extends StatelessWidget {
                           ),
                           onPressed: bankAccount.isActive
                               ? () {
-                            controller.editBankAccount(bankAccount, context);
-                            isExpanded.value = false;
-                          }
+                                  controller.editBankAccount(
+                                      bankAccount, context);
+                                  isExpanded.value = false;
+                                }
                               : null,
                         ),
                         IconButton(
@@ -109,9 +111,10 @@ class BankAccountCard extends StatelessWidget {
                           ),
                           onPressed: bankAccount.isActive
                               ? () {
-                            controller.deactivateBankAccount(bankAccount.id!);
-                            isExpanded.value = false;
-                          }
+                                  controller
+                                      .deactivateBankAccount(bankAccount.id!);
+                                  isExpanded.value = false;
+                                }
                               : null,
                         ),
                       ],

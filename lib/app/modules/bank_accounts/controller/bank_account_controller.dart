@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/bank_account_model.dart';
 import '../../../database/models/clients_model.dart';
@@ -40,7 +41,8 @@ class BankAccountController extends GetxController {
     bankName.value = bankAccount.bankName;
     numberAccount.value = bankAccount.numberAccount;
     code.value = bankAccount.code;
-    selectedClient.value = clients.firstWhere((client) => client.id == bankAccount.clientId);
+    selectedClient.value =
+        clients.firstWhere((client) => client.id == bankAccount.clientId);
 
     showModalBottomSheet(
       context: context,
@@ -70,7 +72,8 @@ class BankAccountController extends GetxController {
     }
 
     final isEditing = editingBankAccountId.value.isNotEmpty;
-    final bankAccountId = isEditing ? int.tryParse(editingBankAccountId.value) : null;
+    final bankAccountId =
+        isEditing ? int.tryParse(editingBankAccountId.value) : null;
 
     final bankAccount = BankAccount(
       id: bankAccountId,
@@ -90,15 +93,32 @@ class BankAccountController extends GetxController {
     try {
       if (bankAccountId == null) {
         await dbHelper.insertBankAccount(bankAccount);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Cuenta de banco guardada correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
         await dbHelper.updateBankAccount(bankAccount);
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Cuenta de banco editada correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       }
       fetchAllBankAccounts();
       clearFields();
       editingBankAccountId.value = '';
       // Get.back();
     } catch (e) {
-      print('Error al guardar/actualizar la cuenta bancaria: $e');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 
@@ -138,7 +158,7 @@ class BankAccountController extends GetxController {
 
   Future<String> getClientName(int clientId) async {
     Client? client = await dbHelper.getClientById(clientId);
-    return client?.businessName ?? 'N/A';
+    return "${client?.name} ${client?.lastName}";
   }
 
   void toggleShowInactive(bool value) {
@@ -172,7 +192,7 @@ class BankAccountController extends GetxController {
       final matchesStatus = showInactive.value || bankAccount.isActive;
 
       return matchesSearch && matchesStatus;
-    }).toList();
+    },).toList();
 
     if (sortCriteria.value == 'date') {
       filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));

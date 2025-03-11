@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../theme/colors.dart';
+import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/clients_model.dart';
 import '../../../database/models/invoice_lines_model.dart';
@@ -34,7 +35,8 @@ class InvoiceController extends GetxController {
   final RxString documentNo = ''.obs;
   final RxString totalPayed = ''.obs;
   final RxString type = ''.obs;
-  final RxInt qty = 0.obs;
+
+  final RxInt selectedQty = 1.obs; // Nueva variable para manejar qty en la UI
 
   final DatabaseHelper dbHelper = DatabaseHelper();
 
@@ -56,13 +58,19 @@ class InvoiceController extends GetxController {
 
   Future<String> getClientName(int clientId) async {
     Client? client = await dbHelper.getClientById(clientId);
-    return client?.businessName ?? 'N/A';
+    return '${client?.name} ${client?.lastName}';
+  }
+
+  Future<void> fetchAllProducts() async {
+    final List<Product> allProducts = await dbHelper.getProducts();
+    products.assignAll(allProducts);
   }
 
   void selectProduct(Product? product) async {
     selectedProduct.value = product;
     availableSerials.clear();
     selectedSerial.value = null;
+    selectedQty.value = 1;
     if (product != null) {
       final List<Serial> serials =
           await dbHelper.getSerialsByProductId(product.id!);
@@ -74,37 +82,89 @@ class InvoiceController extends GetxController {
     selectedClient.value = client;
   }
 
-  Future<void> fetchAllProducts() async {
-    final List<Product> allProducts = await dbHelper.getProducts();
-    products.assignAll(allProducts);
-  }
-
   void selectSerial(Serial? serial) {
     selectedSerial.value = serial;
   }
 
   void addInvoiceLine() {
-    if (selectedProduct.value == null || selectedSerial.value == null) {
-      // Get.snackbar('Error', 'Debe seleccionar un producto y un serial.');
+    if (selectedProduct.value == null) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Debe seleccionar un producto.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
 
-    final invoiceLine = InvoiceLine(
-      productName: selectedProduct.value!.name,
-      productPrice: selectedProduct.value!.price,
-      refProductPrice: selectedProduct.value!.price,
-      total: selectedProduct.value!.price,
-      productId: selectedProduct.value!.id!,
-      productSerial: selectedSerial.value!.serial,
-      invoiceId: 0,
-      createdAt: DateTime.now(),
-    );
+    final product = selectedProduct.value!;
+    final hasSerials = availableSerials.isNotEmpty;
 
-    invoiceLines.add(invoiceLine);
-    qty.value += 1;
+    if (hasSerials) {
+      // Caso: Producto con seriales
+      if (selectedSerial.value == null) {
+        CustomSnackbar.show(
+          title: "¡Ocurrió un error!",
+          message: "Debe seleccionar un serial",
+          icon: Icons.cancel,
+          backgroundColor: AppColors.invalid,
+        );
+        return;
+      }
+
+      final invoiceLine = InvoiceLine(
+        productName: product.name,
+        productPrice: product.price,
+        refProductPrice: product.price,
+        total: product.price,
+        // Total por 1 unidad
+        qty: 1,
+        // Cada serial es una línea con qty 1
+        productId: product.id!,
+        productSerial: selectedSerial.value!.serial,
+        invoiceId: 0,
+        // Se asignará después
+        createdAt: DateTime.now(),
+      );
+
+      invoiceLines.add(invoiceLine);
+      availableSerials.remove(selectedSerial.value); // Eliminar serial usado
+      selectedSerial.value = null;
+    } else {
+      // Caso: Producto sin seriales
+      if (selectedQty.value <= 0 || selectedQty.value > product.serialsQty) {
+        CustomSnackbar.show(
+          title: "¡Ocurrió un error!",
+          message: "Cantidad inválida o excede el stock disponible.",
+          icon: Icons.cancel,
+          backgroundColor: AppColors.invalid,
+        );
+        return;
+      }
+
+      final invoiceLine = InvoiceLine(
+        productName: product.name,
+        productPrice: product.price,
+        refProductPrice: product.price,
+        total: product.price * selectedQty.value,
+        // Total basado en qty
+        qty: selectedQty.value,
+        productId: product.id!,
+        productSerial: '',
+        // Sin serial
+        invoiceId: 0,
+        // Se asignará después
+        createdAt: DateTime.now(),
+      );
+
+      invoiceLines.add(invoiceLine);
+      selectedQty.value = 1; // Reiniciar qty
+    }
+
     selectedProduct.value = null;
     selectedSerial.value = null;
     availableSerials.clear();
+    invoiceTotal.value = calculateTotalAmount();
   }
 
   double calculateTotalAmount() {
@@ -119,15 +179,30 @@ class InvoiceController extends GetxController {
 
   Future<void> saveInvoice() async {
     if (invoiceLines.isEmpty) {
-      Get.snackbar('Error', 'Debe agregar al menos una línea de factura.');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Debe agregar al menos una línea de factura.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
     if (selectedClient.value == null) {
-      Get.snackbar('Error', 'Debe seleccionar un cliente.');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Debe seleccionar un cliente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
     if (documentNo.value.isEmpty) {
-      Get.snackbar('Error', 'El número de documento es obligatorio.');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "El número de documento es obligatorio.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
 
@@ -147,13 +222,13 @@ class InvoiceController extends GetxController {
       totalPayed: parsedTotalPayed,
       refTotalAmount: totalAmount,
       refTotalPayed: parsedTotalPayed,
-      qty: qty.value,
       clientId: selectedClient.value!.id!,
       createdAt: DateTime.now(),
     );
 
     try {
       final invoiceId = await dbHelper.insertInvoice(invoice);
+
       for (var line in invoiceLines) {
         final updatedLine = InvoiceLine(
           productName: line.productName,
@@ -161,20 +236,36 @@ class InvoiceController extends GetxController {
           refProductPrice: line.refProductPrice,
           total: line.total,
           refTotal: line.refTotal,
+          qty: line.qty,
           productId: line.productId,
           productSerial: line.productSerial,
           invoiceId: invoiceId,
           createdAt: line.createdAt,
         );
         await dbHelper.insertInvoiceLine(updatedLine);
-      }
 
-      // Get.snackbar('Éxito', 'Factura guardada correctamente');
+        final product = await dbHelper.getProductById(line.productId);
+        if (line.productSerial.isNotEmpty) {
+          final serial = (await dbHelper.getSerialsByProductId(product!.id!))
+              .firstWhere((s) => s.serial == line.productSerial);
+          serial.isActive = false;
+          await dbHelper.updateSerial(serial);
+        } else {
+          product!.serialsQty -= line.qty;
+          await dbHelper.updateProduct(product);
+        }
+      }
       Get.back();
       clearFields();
       fetchAllInvoices();
+      CustomSnackbar.show(
+        title: "¡Aprobado!",
+        message: "Factura guardada correctamente",
+        icon: Icons.check_circle,
+        backgroundColor: AppColors.principalGreen,
+      );
     } catch (e) {
-      // Get.snackbar('Error', 'No se pudo guardar la factura: ${e.toString()}');
+      Get.snackbar('Error', 'No se pudo guardar la factura: ${e.toString()}');
     }
   }
 
@@ -182,7 +273,6 @@ class InvoiceController extends GetxController {
     documentNo.value = '';
     totalPayed.value = '';
     type.value = '';
-    qty.value = 0;
     selectedClient.value = null;
     selectedProduct.value = null;
     selectedSerial.value = null;
@@ -190,6 +280,8 @@ class InvoiceController extends GetxController {
     availableSerials.clear();
     clients.clear();
     products.clear();
+    selectedQty.value = 1;
+    invoiceTotal.value = 0.0;
   }
 
   Future<void> fetchAllInvoices() async {
@@ -232,7 +324,7 @@ class InvoiceController extends GetxController {
       isLoadingInvoiceLines.value = true;
       final lines = await dbHelper.getInvoiceLinesByInvoiceId(invoiceId);
       invoiceLines.assignAll(lines);
-      invoiceTotal.value = lines.fold(0.0, (sum, line) => sum + line.total);
+      invoiceTotal.value = calculateTotalAmount();
     } catch (e) {
       print('Error cargando líneas de factura: $e');
     } finally {
@@ -285,7 +377,7 @@ class InvoiceController extends GetxController {
                 child: InvoiceDetailsModal(invoiceId: invoiceId),
               ),
             ],
-          ) ,
+          ),
         );
       },
     );

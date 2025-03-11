@@ -50,12 +50,36 @@ class InvoiceForm extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             Obx(
-                  () => CustomDropdown<Serial>(
+                  () => invoiceController.availableSerials.isNotEmpty
+                  ? CustomDropdown<Serial>(
                 hintText: 'Seriales',
                 value: invoiceController.selectedSerial.value,
                 items: invoiceController.availableSerials.toList(),
                 itemTextBuilder: (serial) => serial.serial,
                 onChanged: (serial) => invoiceController.selectSerial(serial),
+              )
+                  : Row(
+                children: [
+                  Expanded(
+                    child: GenericFormInput(
+                      label: 'Cantidad',
+                      keyboardType: TextInputType.number,
+                      icon: Icons.numbers,
+                      onChanged: (value) =>
+                      invoiceController.selectedQty.value = int.tryParse(value) ?? 1,
+                      controller: TextEditingController()
+                        ..text = invoiceController.selectedQty.value.toString(),
+                    ),
+                  ),
+                  if (invoiceController.selectedProduct.value != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        'Disponible: ${invoiceController.selectedProduct.value!.serialsQty}',
+                        style: TextStyle(color: AppColors.principalWhite),
+                      ),
+                    ),
+                ],
               ),
             ),
             SizedBox(height: 16.0),
@@ -68,7 +92,6 @@ class InvoiceForm extends StatelessWidget {
               child: Text('Agregar Línea'),
             ),
             SizedBox(height: 24.0),
-
             Text(
               "Productos",
               style: TextStyle(
@@ -84,9 +107,15 @@ class InvoiceForm extends StatelessWidget {
                   int index = invoiceController.invoiceLines.indexOf(invoiceLine);
                   return ListTile(
                     title: Text(
-                      "${invoiceLine.productName} - \$${invoiceLine.total}",
+                      "${invoiceLine.productName} (x${invoiceLine.qty}) - \$${invoiceLine.total}",
                       style: TextStyle(color: AppColors.principalWhite),
                     ),
+                    subtitle: invoiceLine.productSerial.isNotEmpty
+                        ? Text(
+                      "Serial: ${invoiceLine.productSerial}",
+                      style: TextStyle(color: AppColors.principalGray),
+                    )
+                        : null,
                     trailing: IconButton(
                       icon: Icon(Icons.delete, color: AppColors.invalid),
                       onPressed: () => invoiceController.invoiceLines.removeAt(index),
@@ -123,7 +152,6 @@ class InvoiceForm extends StatelessWidget {
               ),
             ),
             SizedBox(height: 32.0),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
