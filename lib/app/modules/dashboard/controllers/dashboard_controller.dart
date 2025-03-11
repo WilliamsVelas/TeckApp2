@@ -9,6 +9,7 @@ class DashboardController extends GetxController {
   final RxList<Product> products = <Product>[].obs;
   final RxList<Invoice> invoices = <Invoice>[].obs;
   final RxInt totalSales = 0.obs;
+  final RxInt totalSalesNonPayment = 0.obs;
   final RxDouble totalPayed = 0.0.obs;
 
   final dbHelper = DatabaseHelper();
@@ -38,7 +39,10 @@ class DashboardController extends GetxController {
 
   Future<void> fetchTotalSales() async {
     final List<Invoice> allInvoices = await dbHelper.getInvoices();
+
     totalSales.value = allInvoices.length;
+    totalSalesNonPayment.value =
+        allInvoices.where((invoice) => invoice.type == 'INV_N_P').length;
   }
 
   Future<void> fetchTotalPayed() async {

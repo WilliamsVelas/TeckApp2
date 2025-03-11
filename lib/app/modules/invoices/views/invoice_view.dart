@@ -27,24 +27,35 @@ class InvoiceView extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: GenericInput(
-                    hintText: 'Buscar venta...',
-                    onChanged: (value) {
-                      controller.searchInvoices(value);
-                    },
-                    prefixIcon: const Icon(Icons.search),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GenericInput(
+                        hintText: 'Buscar venta...',
+                        onChanged: (value) {
+                          controller.searchInvoices(value);
+                        },
+                        prefixIcon: const Icon(Icons.search),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.sort),
+                      onPressed: () {
+                        _showSortDialog(context, controller);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.filter_alt),
+                      onPressed: () {
+                        _showFilterDialog(context, controller);
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.sort),
-                  onPressed: () {
-                    _showSortDialog(context, controller);
-                  },
-                ),
+                SizedBox(height: 8),
               ],
             ),
           ),
@@ -84,8 +95,8 @@ class InvoiceView extends StatelessWidget {
                         return const Center(
                           child: Text(
                             'No hay ventas disponibles.',
-                            style:
-                                TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
+                            style: TextStyle(
+                                fontSize: 16.0, color: AppColors.principalGray),
                           ),
                         );
                       }
@@ -168,6 +179,38 @@ class InvoiceView extends StatelessWidget {
     );
   }
 
+  void _showFilterDialog(BuildContext context, InvoiceController controller) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Filtrar ventas'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Obx(
+                    () => Checkbox(
+                      value: controller.showUnpaidOnly.value,
+                      onChanged: (value) =>
+                          controller.toggleUnpaidFilter(value ?? false),
+                      activeColor: AppColors.principalGreen,
+                    ),
+                  ),
+                  Text(
+                    'Mostrar solo ventas no pagadas',
+                    style: TextStyle(color: AppColors.principalWhite),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _openInvoiceForm(BuildContext context) {
     Get.to(() => InvoiceFormView());
   }
@@ -206,7 +249,7 @@ class InvoiceFormView extends StatelessWidget {
           ),
         ),
         body: Obx(
-              () {
+          () {
             if (controller.clients.isEmpty || controller.products.isEmpty) {
               return Center(
                 child: CircularProgressIndicator(

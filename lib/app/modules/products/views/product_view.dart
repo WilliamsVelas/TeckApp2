@@ -91,8 +91,8 @@ class ProductView extends StatelessWidget {
                         return const Center(
                           child: Text(
                             'No hay productos disponibles.',
-                            style:
-                                TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
+                            style: TextStyle(
+                                fontSize: 16.0, color: AppColors.principalGray),
                           ),
                         );
                       }
@@ -230,6 +230,12 @@ class ProductFormView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController productController = Get.find<ProductController>();
     // productController.clearFields();
+
+    if (productController.categories.isEmpty ||
+        productController.providers.isEmpty) {
+      productController.fetchAll();
+    }
+
     return WillPopScope(
       onWillPop: () async {
         productController.clearFields();
@@ -259,19 +265,7 @@ class ProductFormView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        body: Obx(
-              () {
-            if (productController.categories.isEmpty || productController.providers.isEmpty) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.principalWhite,
-                ),
-              );
-            } else {
-              return ProductForm();
-            }
-          },
-        ),
+        body: ProductForm()
       ),
     );
   }

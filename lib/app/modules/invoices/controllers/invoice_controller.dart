@@ -36,7 +36,9 @@ class InvoiceController extends GetxController {
   final RxString totalPayed = ''.obs;
   final RxString type = ''.obs;
 
-  final RxInt selectedQty = 1.obs; // Nueva variable para manejar qty en la UI
+  final RxInt selectedQty = 1.obs;
+
+  final RxBool showUnpaidOnly = false.obs;
 
   final DatabaseHelper dbHelper = DatabaseHelper();
 
@@ -72,9 +74,8 @@ class InvoiceController extends GetxController {
     selectedSerial.value = null;
     selectedQty.value = 1;
     if (product != null) {
-      final List<Serial> serials =
-          await dbHelper.getSerialsByProductId(product.id!);
-      availableSerials.assignAll(serials);
+      final List<Serial> serials = await dbHelper.getSerialsByProductId(product.id!);
+      availableSerials.assignAll(serials.where((serial) => serial.status == 'activo'));
     }
   }
 
@@ -101,7 +102,6 @@ class InvoiceController extends GetxController {
     final hasSerials = availableSerials.isNotEmpty;
 
     if (hasSerials) {
-      // Caso: Producto con seriales
       if (selectedSerial.value == null) {
         CustomSnackbar.show(
           title: "¡Ocurrió un error!",
@@ -117,21 +117,17 @@ class InvoiceController extends GetxController {
         productPrice: product.price,
         refProductPrice: product.price,
         total: product.price,
-        // Total por 1 unidad
         qty: 1,
-        // Cada serial es una línea con qty 1
         productId: product.id!,
         productSerial: selectedSerial.value!.serial,
         invoiceId: 0,
-        // Se asignará después
         createdAt: DateTime.now(),
       );
 
       invoiceLines.add(invoiceLine);
-      availableSerials.remove(selectedSerial.value); // Eliminar serial usado
+      availableSerials.remove(selectedSerial.value);
       selectedSerial.value = null;
     } else {
-      // Caso: Producto sin seriales
       if (selectedQty.value <= 0 || selectedQty.value > product.serialsQty) {
         CustomSnackbar.show(
           title: "¡Ocurrió un error!",
@@ -147,18 +143,15 @@ class InvoiceController extends GetxController {
         productPrice: product.price,
         refProductPrice: product.price,
         total: product.price * selectedQty.value,
-        // Total basado en qty
         qty: selectedQty.value,
         productId: product.id!,
         productSerial: '',
-        // Sin serial
         invoiceId: 0,
-        // Se asignará después
         createdAt: DateTime.now(),
       );
 
       invoiceLines.add(invoiceLine);
-      selectedQty.value = 1; // Reiniciar qty
+      selectedQty.value = 1;
     }
 
     selectedProduct.value = null;
@@ -248,7 +241,7 @@ class InvoiceController extends GetxController {
         if (line.productSerial.isNotEmpty) {
           final serial = (await dbHelper.getSerialsByProductId(product!.id!))
               .firstWhere((s) => s.serial == line.productSerial);
-          serial.isActive = false;
+          serial.status = 'usado';
           await dbHelper.updateSerial(serial);
         } else {
           product!.serialsQty -= line.qty;
@@ -265,7 +258,37 @@ class InvoiceController extends GetxController {
         backgroundColor: AppColors.principalGreen,
       );
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo guardar la factura: ${e.toString()}');
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Verifique los datos e intente nuevamente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+    }
+  }
+
+  Future<void> payInvoice(int invoiceId) async {
+    try {
+      final invoice = invoices.firstWhere((inv) => inv.id == invoiceId);
+      invoice.type = 'INV_P';
+      invoice.totalPayed = invoice.totalAmount;
+      invoice.updatedAt = DateTime.now();
+
+      await dbHelper.updateInvoice(invoice);
+      fetchAllInvoices();
+      CustomSnackbar.show(
+        title: "¡Aprobado!",
+        message: "Factura pagada correctamente",
+        icon: Icons.check_circle,
+        backgroundColor: AppColors.principalGreen,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "No se pudo pagar la factura: $e",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
     }
   }
 
@@ -288,6 +311,7 @@ class InvoiceController extends GetxController {
     final List<Invoice> allInvoices = await dbHelper.getInvoices();
     invoices.assignAll(allInvoices);
     originalInvoices.assignAll(allInvoices);
+    applyFilters();
   }
 
   void searchInvoices(String query) {
@@ -300,14 +324,18 @@ class InvoiceController extends GetxController {
     applyFilters();
   }
 
+  void toggleUnpaidFilter(bool value) {
+    showUnpaidOnly.value = value;
+    applyFilters();
+  }
+
   void applyFilters() {
-    final filtered = originalInvoices.where((invoice) {
+    var filtered = originalInvoices.where((invoice) {
       final matchesSearch = searchQuery.isEmpty ||
-          invoice.documentNo
-              .toLowerCase()
-              .contains(searchQuery.value.toLowerCase()) ||
+          invoice.documentNo.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           invoice.type.toLowerCase().contains(searchQuery.value.toLowerCase());
-      return matchesSearch;
+      final matchesUnpaid = !showUnpaidOnly.value || invoice.type == 'INV_N_P';
+      return matchesSearch && matchesUnpaid;
     }).toList();
 
     if (sortCriteria.value == 'date') {

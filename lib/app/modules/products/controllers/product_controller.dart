@@ -160,6 +160,7 @@ class ProductController extends GetxController {
           for (var serialNumber in serials) {
             Serial serial = Serial(
               productId: productId,
+              status: "activo",
               serial: serialNumber,
               createdAt: DateTime.now(),
             );
@@ -215,12 +216,12 @@ class ProductController extends GetxController {
   }
 
   void clearFields() {
-    nameController.dispose();
-    codeController.dispose();
-    priceController.dispose();
-    minStockController.dispose();
-    qtyController.dispose();
-    newSerialController.dispose();
+    nameController.clear();
+    codeController.clear();
+    priceController.clear();
+    minStockController.clear();
+    qtyController.clear();
+    newSerialController.clear();
     providerId.value = 0;
     categoryId.value = 0;
     serials.clear();

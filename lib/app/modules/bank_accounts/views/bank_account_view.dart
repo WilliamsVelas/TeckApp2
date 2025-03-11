@@ -9,7 +9,6 @@ import '../../../common/generic_input.dart';
 import '../widgets/bank_account_card.dart';
 
 class BankAccountView extends GetView<BankAccountController> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +37,7 @@ class BankAccountView extends GetView<BankAccountController> {
                   child: GenericInput(
                     hintText: 'Buscar cuenta bancaria...',
                     onChanged: (value) {
-                      //controller.searchBankAccounts(value); // Implement search if required
+                      //controller.searchBankAccounts(value);
                     },
                     prefixIcon: const Icon(Icons.search),
                   ),
@@ -47,7 +46,7 @@ class BankAccountView extends GetView<BankAccountController> {
                 IconButton(
                   icon: const Icon(Icons.sort),
                   onPressed: () {
-                    //_showSortDialog(context, controller); // Implement sort if required
+                    //_showSortDialog(context, controller);
                   },
                 ),
               ],

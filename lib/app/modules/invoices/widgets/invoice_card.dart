@@ -19,7 +19,7 @@ class InvoiceCard extends StatelessWidget {
     RxBool isExpanded = false.obs;
 
     return Obx(
-      () => GestureDetector(
+          () => GestureDetector(
         onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
@@ -35,14 +35,14 @@ class InvoiceCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(invoice.documentNo,
-                        style: TextStyle(color: AppColors.principalWhite)),
+                    Text(
+                      invoice.documentNo,
+                      style: TextStyle(color: AppColors.principalWhite),
+                    ),
                     Text(
                       invoice.type == "INV_P" ? "Pagada" : "Pendiente",
                       style: TextStyle(
-                        color: invoice.type == "INV_P"
-                            ? Colors.green
-                            : Colors.orange,
+                        color: invoice.type == "INV_P" ? Colors.green : Colors.orange,
                       ),
                     ),
                   ],
@@ -64,8 +64,7 @@ class InvoiceCard extends StatelessWidget {
                             ),
                           );
                         }
-                        return Text('Cargando...',
-                            style: TextStyle(color: AppColors.principalGray));
+                        return Text('Cargando...', style: TextStyle(color: AppColors.principalGray));
                       },
                     ),
                     Text(
@@ -84,11 +83,14 @@ class InvoiceCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.receipt,
-                              color: AppColors.principalGreen),
-                          onPressed: () => controller.showInvoiceDetailsModal(
-                              invoice.id!, context),
+                          icon: Icon(Icons.receipt, color: AppColors.principalGreen),
+                          onPressed: () => controller.showInvoiceDetailsModal(invoice.id!, context),
                         ),
+                        if (invoice.type == 'INV_N_P') // Botón "Pagar" solo para INV_N_P
+                          IconButton(
+                            icon: Icon(Icons.payment, color: AppColors.principalGreen),
+                            onPressed: () => controller.payInvoice(invoice.id!),
+                          ),
                       ],
                     ),
                   ),

@@ -67,9 +67,9 @@ class ClientForm extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
-              label: 'Value',
+              label: 'C.I / RIF',
               keyboardType: TextInputType.text,
-              icon: Icons.attach_money,
+              icon: Icons.perm_identity,
               onChanged: (value) => clientController.value.value = value,
               controller: TextEditingController()
                 ..text = clientController.value.value,

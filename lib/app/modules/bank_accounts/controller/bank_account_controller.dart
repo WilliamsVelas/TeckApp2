@@ -10,7 +10,6 @@ import '../../../database/models/clients_model.dart';
 import '../widgets/bank_account_form.dart';
 
 class BankAccountController extends GetxController {
-  // Observables existentes
   final RxList<BankAccount> bankAccounts = <BankAccount>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString sortCriteria = ''.obs;
@@ -67,7 +66,13 @@ class BankAccountController extends GetxController {
 
   Future<void> saveBankAccount() async {
     if (selectedClient.value == null) {
-      // Get.snackbar('Error', 'Por favor, selecciona un Cliente.', backgroundColor: Colors.red);
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Por favor, selecciona un Cliente.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      // Get.snackbar('Error', '', backgroundColor: Colors.red);
       return;
     }
 

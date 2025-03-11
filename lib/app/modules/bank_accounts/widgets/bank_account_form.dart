@@ -29,48 +29,46 @@ class BankAccountForm extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24.0),
-
-            // Input bankName
             GenericFormInput(
               label: 'Nombre del Banco',
               keyboardType: TextInputType.text,
               icon: Icons.account_balance,
-              onChanged: (value) => bankAccountController.bankName.value = value,
-              controller: TextEditingController()..text = bankAccountController.bankName.value,
+              onChanged: (value) =>
+                  bankAccountController.bankName.value = value,
+              controller: TextEditingController()
+                ..text = bankAccountController.bankName.value,
             ),
             SizedBox(height: 16.0),
-
-            // Input numberAccount
-            GenericFormInput(
-              label: 'Número de Cuenta',
-              keyboardType: TextInputType.number,
-              icon: Icons.credit_card,
-              onChanged: (value) => bankAccountController.numberAccount.value = value,
-              controller: TextEditingController()..text = bankAccountController.numberAccount.value,
-            ),
-            SizedBox(height: 16.0),
-
-            // Input code
             GenericFormInput(
               label: 'Código',
               keyboardType: TextInputType.text,
               icon: Icons.code,
               onChanged: (value) => bankAccountController.code.value = value,
-              controller: TextEditingController()..text = bankAccountController.code.value,
+              controller: TextEditingController()
+                ..text = bankAccountController.code.value,
             ),
             SizedBox(height: 16.0),
-
-            Obx(() => CustomDropdown<Client>(
-              hintText: 'Cliente',
-              value: bankAccountController.selectedClient.value,
-              items: bankAccountController.clients,
-              itemTextBuilder: (client) => client.businessName,
-              onChanged: (client) => bankAccountController.selectClient(client),
-            )),
-
+            GenericFormInput(
+              label: 'Número de Cuenta',
+              keyboardType: TextInputType.number,
+              icon: Icons.credit_card,
+              onChanged: (value) =>
+                  bankAccountController.numberAccount.value = value,
+              controller: TextEditingController()
+                ..text = bankAccountController.numberAccount.value,
+            ),
+            SizedBox(height: 16.0),
+            Obx(
+              () => CustomDropdown<Client>(
+                hintText: 'Cliente',
+                value: bankAccountController.selectedClient.value,
+                items: bankAccountController.clients,
+                itemTextBuilder: (client) => client.businessName,
+                onChanged: (client) =>
+                    bankAccountController.selectClient(client),
+              ),
+            ),
             SizedBox(height: 32.0),
-
-            // Row Save Clear
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -83,7 +81,8 @@ class BankAccountForm extends StatelessWidget {
                     backgroundColor: AppColors.principalButton,
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: TextStyle(fontSize: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                   child: Text('Guardar'),
                 ),
@@ -96,7 +95,8 @@ class BankAccountForm extends StatelessWidget {
                     backgroundColor: AppColors.invalid,
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: TextStyle(fontSize: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                   child: Text('Borrar'),
                 ),

@@ -18,7 +18,7 @@ class DashboardView extends StatelessWidget {
       backgroundColor: AppColors.onPrincipalBackground,
       body: RefreshIndicator(
         onRefresh: () async {
-           controller.fetchAll();
+          controller.fetchAll();
         },
         color: AppColors.principalGreen,
         backgroundColor: AppColors.onPrincipalBackground,
@@ -28,64 +28,108 @@ class DashboardView extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Obx(
-                            () => Card(
-                          color: AppColors.principalBackground,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Ventas',
-                                  style: TextStyle(color: AppColors.principalWhite, fontSize: 16),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  '${controller.totalSales.value}',
-                                  style: TextStyle(
-                                    color: AppColors.principalGreen,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Obx(
+                            () => SizedBox(
+                          width: 150,
+                          child: Card(
+                            color: AppColors.principalBackground,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Ventas',
+                                    style: TextStyle(color: AppColors.principalWhite, fontSize: 16),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '${controller.totalSales.value}',
+                                    style: TextStyle(
+                                      color: AppColors.principalGreen,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Obx(
-                            () => Card(
-                          color: AppColors.principalBackground,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Vendido',
-                                  style: TextStyle(color: AppColors.principalWhite, fontSize: 16),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  '\$${controller.totalPayed.value}',
-                                  style: TextStyle(
-                                    color: AppColors.principalGreen,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
+                      SizedBox(width: 8),
+                      Obx(
+                            () => SizedBox(
+                          width: 150,
+                          child: Card(
+                            color: AppColors.principalBackground,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Por cobrar',
+                                    style: TextStyle(color: AppColors.principalWhite, fontSize: 16),
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '${controller.totalSalesNonPayment.value}',
+                                    style: TextStyle(
+                                      color: AppColors.invalid,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 8),
+                      Obx(
+                            () => SizedBox(
+                          width: 150,
+                          child: Card(
+                            color: AppColors.principalBackground,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Vendido',
+                                    style: TextStyle(color: AppColors.principalWhite, fontSize: 16),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '\$${controller.totalPayed.value}',
+                                    style: TextStyle(
+                                      color: AppColors.principalGreen,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -123,7 +167,7 @@ class DashboardView extends StatelessWidget {
                           return const Center(
                             child: Text(
                               'No hay productos disponibles.',
-                              style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
+                              style: TextStyle(fontSize: 16.0, color: AppColors.principalGray),
                             ),
                           );
                         }
@@ -178,7 +222,7 @@ class DashboardView extends StatelessWidget {
                           return const Center(
                             child: Text(
                               'No hay ventas disponibles.',
-                              style: TextStyle(fontSize: 16.0, color:  AppColors.principalGray),
+                              style: TextStyle(fontSize: 16.0, color: AppColors.principalGray),
                             ),
                           );
                         }
