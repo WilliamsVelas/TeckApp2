@@ -82,9 +82,9 @@ class ClientsController extends GetxController {
       affiliateCode: affiliateCode.value,
       value: value.value,
       createdAt: clientId == null
-          ? DateTime.now()
+          ? DateTime.now().millisecondsSinceEpoch
           : clients.firstWhere((c) => c.id == clientId).createdAt,
-      updatedAt: clientId != null ? DateTime.now() : null,
+      updatedAt: clientId != null ? DateTime.now().millisecondsSinceEpoch : null,
       isActive: clientId == null
           ? true
           : clients.firstWhere((c) => c.id == clientId).isActive,
@@ -127,7 +127,7 @@ class ClientsController extends GetxController {
       final client = await dbHelper.getClientById(clientId);
       if (client != null) {
         client.isActive = false;
-        client.updatedAt = DateTime.now();
+        client.updatedAt = DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updateClient(client);
         fetchAllClients();
         print('Cliente desactivado con ID: $clientId');

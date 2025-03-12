@@ -15,6 +15,8 @@ import 'package:teck_app/app/modules/products/bindings/product_binding.dart';
 import 'package:teck_app/app/modules/products/views/product_view.dart';
 import 'package:teck_app/app/modules/providers/bindings/provider_binding.dart';
 import 'package:teck_app/app/modules/providers/views/provier_view.dart';
+import 'package:teck_app/app/modules/reports/bindings/report_binding.dart';
+import 'package:teck_app/app/modules/reports/views/report_view.dart';
 import 'package:teck_app/app/modules/statistics/bindings/statistics_binding.dart';
 import 'package:teck_app/app/modules/statistics/views/statistics_view.dart';
 import 'package:teck_app/app/modules/user/bindings/user_binding.dart';
@@ -79,5 +81,10 @@ class AppPages {
       page: () => StatisticsView(),
       binding: StatisticsBinding(),
     ),
+    //Reports view
+    GetPage(
+        name: AppRoutes.REPORTS,
+        page: () => ReportView(),
+        binding: ReportBinding())
   ];
 }

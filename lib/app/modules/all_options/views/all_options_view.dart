@@ -58,7 +58,7 @@ class AllOptionsView extends StatelessWidget {
     {
       'icon': Icons.inventory_outlined,
       'name': 'Reportes',
-      'route': AppRoutes.PROVIDERS,
+      'route': AppRoutes.REPORTS,
       'color': AppColors.principalGreen,
       'iconColor': AppColors.onPrincipalBackground,
     },

@@ -272,7 +272,7 @@ class SerialCard extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Text(
-              'Registrado: ${DateFormat('dd/MM/yyyy').format(serial.createdAt)}',
+              'Registrado: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(serial.createdAt))}',
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.principalGray,

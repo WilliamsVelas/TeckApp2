@@ -121,7 +121,7 @@ class InvoiceController extends GetxController {
         productId: product.id!,
         productSerial: selectedSerial.value!.serial,
         invoiceId: 0,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().millisecondsSinceEpoch,
       );
 
       invoiceLines.add(invoiceLine);
@@ -147,7 +147,7 @@ class InvoiceController extends GetxController {
         productId: product.id!,
         productSerial: '',
         invoiceId: 0,
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().millisecondsSinceEpoch,
       );
 
       invoiceLines.add(invoiceLine);
@@ -216,7 +216,7 @@ class InvoiceController extends GetxController {
       refTotalAmount: totalAmount,
       refTotalPayed: parsedTotalPayed,
       clientId: selectedClient.value!.id!,
-      createdAt: DateTime.now(),
+      createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
     try {
@@ -272,7 +272,7 @@ class InvoiceController extends GetxController {
       final invoice = invoices.firstWhere((inv) => inv.id == invoiceId);
       invoice.type = 'INV_P';
       invoice.totalPayed = invoice.totalAmount;
-      invoice.updatedAt = DateTime.now();
+      invoice.updatedAt = DateTime.now().millisecondsSinceEpoch;
 
       await dbHelper.updateInvoice(invoice);
       fetchAllInvoices();

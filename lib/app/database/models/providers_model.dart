@@ -4,8 +4,8 @@ class Provider {
   String lastName;
   String businessName;
   String value;
-  DateTime createdAt;
-  DateTime? updatedAt;
+  int createdAt;
+  int? updatedAt;
   bool isActive;
 
   Provider({
@@ -26,8 +26,8 @@ class Provider {
       'lastName': lastName,
       'businessName': businessName,
       'value': value,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
     };
   }
@@ -39,10 +39,8 @@ class Provider {
       lastName: map['lastName'] as String,
       businessName: map['businessName'] as String,
       value: map['value'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt'] as String)
-          : null,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,
     );
   }

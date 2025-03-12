@@ -54,11 +54,11 @@ class DatabaseHelper {
       serialsQty INTEGER,
       categoryId INTEGER,
       providerId INTEGER,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // categories table
     await db.execute('''
@@ -66,11 +66,11 @@ class DatabaseHelper {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       code TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // payment methods table
     await db.execute('''
@@ -78,11 +78,11 @@ class DatabaseHelper {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       code TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // user table
     await db.execute('''
@@ -91,11 +91,11 @@ class DatabaseHelper {
       name TEXT,
       lastName TEXT,
       username TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // clients table
     await db.execute('''
@@ -106,11 +106,11 @@ class DatabaseHelper {
       businessName TEXT,
       affiliateCode TEXT,
       value TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // providers table
     await db.execute('''
@@ -120,22 +120,22 @@ class DatabaseHelper {
       lastName TEXT,
       businessName TEXT,
       value TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // images table
     await db.execute('''
     CREATE TABLE images (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       uri TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // serials table
     await db.execute('''
@@ -144,11 +144,11 @@ class DatabaseHelper {
       productId INTEGER,
       serial TEXT,
       status TEXT,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // bank account table
     await db.execute('''
@@ -158,11 +158,11 @@ class DatabaseHelper {
       numberAccount TEXT,
       code TEXT,
       clientId INTEGER,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // invoices table
     await db.execute('''
@@ -175,12 +175,11 @@ class DatabaseHelper {
       refTotalAmount REAL,
       refTotalPayed REAL,
       clientId INTEGER,
-      productId INTEGER,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
 
     // invoice line table
     await db.execute('''
@@ -195,11 +194,11 @@ class DatabaseHelper {
       productId INTEGER,
       productSerial TEXT,
       invoiceId INTEGER,
-      createdAt TEXT,
-      updatedAt TEXT,
+      createdAt INTEGER,
+      updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
     )
-    ''');
+  ''');
   }
 
   Future<void> close() async {
@@ -229,7 +228,7 @@ class DatabaseHelper {
 
   Future<int> updateProduct(Product product) async {
     final db = await database;
-    product.updatedAt = DateTime.now();
+    product.updatedAt = DateTime.now().millisecondsSinceEpoch;
     return await db.update(
       'products',
       product.toMap(),
@@ -240,7 +239,7 @@ class DatabaseHelper {
 
   Future<int> desactiveProduct(Product product) async {
     final db = await database;
-    product.updatedAt = DateTime.now();
+    product.updatedAt = DateTime.now().millisecondsSinceEpoch;
     product.isActive = false;
     return await db.update(
       'products',
@@ -519,6 +518,8 @@ class DatabaseHelper {
       orderBy: 'createdAt DESC',
     );
 
+    print("invoices = ${maps}");
+
     return List.generate(maps.length, (i) {
       return Invoice.fromMap(maps[i]);
     });
@@ -558,6 +559,8 @@ class DatabaseHelper {
       orderBy: 'createdAt DESC',
       limit: 10,
     );
+
+    // print("invoices: = ${maps}");
 
     return List.generate(maps.length, (i) {
       return Invoice.fromMap(maps[i]);
@@ -674,7 +677,7 @@ class DatabaseHelper {
   // Users
   Future<int> insertUser(User user) async {
     final db = await database;
-    user.isActive = true; // Establecer isActive como true por defecto
+    user.isActive = true;
     return await db.insert('users', user.toMap());
   }
 
@@ -715,5 +718,32 @@ class DatabaseHelper {
     } else {
       return null;
     }
+  }
+
+  //Reports
+  Future<List<Map<String, dynamic>>> getSalesReport(
+      int startDate, int endDate) async {
+    final db = await database;
+
+    print("end date = $endDate start date = $startDate");
+
+    final query = '''
+  SELECT 
+    i.id AS invoiceId,
+    i.documentNo,
+    i.createdAt AS invoiceDate,
+    il.productName,
+    il.productPrice,
+    il.qty,
+    il.productSerial,
+    il.total AS lineTotal
+  FROM invoices i
+  INNER JOIN invoiceLine il ON i.id = il.invoiceId
+
+  ORDER BY il.createdAt ASC
+''';
+
+    final result = await db.rawQuery(query);
+    return result;
   }
 }

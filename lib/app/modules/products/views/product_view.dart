@@ -7,6 +7,7 @@ import 'package:teck_app/app/modules/products/views/product_card.dart';
 import 'package:teck_app/app/modules/products/views/product_form.dart';
 import 'package:teck_app/theme/colors.dart';
 
+import '../../../common/custom_snakcbar.dart';
 import '../../../common/generic_input.dart';
 import '../../home/views/home_view.dart';
 
@@ -15,6 +16,8 @@ class ProductView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    controller.clearLists();
+    controller.fetchAll();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.onPrincipalBackground,
@@ -220,22 +223,24 @@ class ProductView extends StatelessWidget {
   }
 
   void _openProductForm(BuildContext context) {
-    controller.fetchAll();
+    controller.clearFields();
+    if (controller.categories.isEmpty || controller.providers.isEmpty) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Guarde proveedores y categorias para continuar.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+    }
     Get.to(() => ProductFormView());
   }
 }
 
 class ProductFormView extends StatelessWidget {
+  final ProductController productController = Get.find<ProductController>();
+
   @override
   Widget build(BuildContext context) {
-    final ProductController productController = Get.find<ProductController>();
-    // productController.clearFields();
-
-    if (productController.categories.isEmpty ||
-        productController.providers.isEmpty) {
-      productController.fetchAll();
-    }
-
     return WillPopScope(
       onWillPop: () async {
         productController.clearFields();
@@ -265,7 +270,39 @@ class ProductFormView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        body: ProductForm()
+        body: FutureBuilder<bool>(
+          future: productController.hasCategoriesAndProviders(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.principalWhite,
+                ),
+              );
+            }
+
+            if (!snapshot.hasData || !snapshot.data!) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.back();
+                CustomSnackbar.show(
+                  title: "¡Error!",
+                  message: "Debe haber al menos una categoría y un proveedor.",
+                  icon: Icons.error,
+                  backgroundColor: AppColors.invalid,
+                );
+              });
+
+              return Center(
+                child: Text(
+                  "No hay categorías o proveedores disponibles.",
+                  style: TextStyle(color: AppColors.principalWhite),
+                ),
+              );
+            }
+
+            return ProductForm();
+          },
+        ),
       ),
     );
   }

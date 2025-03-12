@@ -21,7 +21,6 @@ class ProductForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Campo: Nombre del producto
             GenericFormInput(
               label: 'Nombre del producto',
               keyboardType: TextInputType.text,
@@ -31,7 +30,6 @@ class ProductForm extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
 
-            // Campo: Código del producto
             GenericFormInput(
               label: 'Código del producto',
               keyboardType: TextInputType.text,

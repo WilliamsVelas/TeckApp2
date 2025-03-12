@@ -87,9 +87,9 @@ class BankAccountController extends GetxController {
       code: code.value,
       clientId: selectedClient.value!.id!,
       createdAt: bankAccountId == null
-          ? DateTime.now()
+          ? DateTime.now().millisecondsSinceEpoch
           : bankAccounts.firstWhere((ba) => ba.id == bankAccountId).createdAt,
-      updatedAt: bankAccountId != null ? DateTime.now() : null,
+      updatedAt: bankAccountId != null ? DateTime.now().millisecondsSinceEpoch : null,
       isActive: bankAccountId == null
           ? true
           : bankAccounts.firstWhere((ba) => ba.id == bankAccountId).isActive,
@@ -132,7 +132,7 @@ class BankAccountController extends GetxController {
       final bankAccount = await dbHelper.getBankAccountById(bankAccountId);
       if (bankAccount != null) {
         bankAccount.isActive = false;
-        bankAccount.updatedAt = DateTime.now();
+        bankAccount.updatedAt = DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updateBankAccount(bankAccount);
         fetchAllBankAccounts();
         print('Cuenta bancaria desactivada con ID: $bankAccountId');

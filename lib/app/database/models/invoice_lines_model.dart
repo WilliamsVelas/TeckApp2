@@ -9,8 +9,8 @@ class InvoiceLine {
   int productId;
   String productSerial;
   int invoiceId;
-  DateTime createdAt;
-  DateTime? updatedAt;
+  int createdAt;
+  int? updatedAt;
   bool isActive;
 
   InvoiceLine({
@@ -41,8 +41,8 @@ class InvoiceLine {
       'productId': productId,
       'productSerial': productSerial,
       'invoiceId': invoiceId,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
     };
   }
@@ -59,10 +59,8 @@ class InvoiceLine {
       productId: map['productId'] as int,
       productSerial: map['productSerial'] as String,
       invoiceId: map['invoiceId'] as int,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt'] as String)
-          : null,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,
     );
   }

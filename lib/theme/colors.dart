@@ -23,4 +23,8 @@ class AppColors {
   //Fonts
   static const principalBlackFont = Color(0xFF1E1E1E);
   static const principalGrayFont = Color(0xFF666666);
+
+  //Reports
+  static const header = Color(0xFFA0D6F5);
+  static const subHeader = Color(0xFF99C738);
 }

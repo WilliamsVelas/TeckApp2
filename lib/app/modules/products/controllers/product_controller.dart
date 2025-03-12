@@ -29,7 +29,7 @@ class ProductController extends GetxController {
   final RxList<Category> categories = <Category>[].obs;
   final RxList<Provider> providers = <Provider>[].obs;
 
-  //Serials
+  // Serials
   final RxList<Serial> productSerials = <Serial>[].obs;
   final RxBool isLoadingSerials = false.obs;
 
@@ -42,6 +42,7 @@ class ProductController extends GetxController {
   final RxString code = ''.obs;
   final RxString price = ''.obs;
   final RxString minStock = ''.obs;
+
   // Controladores de texto
   final nameController = TextEditingController();
   final codeController = TextEditingController();
@@ -55,8 +56,11 @@ class ProductController extends GetxController {
   final RxBool isSerial = false.obs;
 
   final RxString editingProductId = ''.obs;
-
   final RxBool hasSerials = false.obs;
+
+  // Estados de carga
+  final RxBool isLoadingCategories = false.obs;
+  final RxBool isLoadingProviders = false.obs;
 
   final dbHelper = DatabaseHelper();
 
@@ -68,12 +72,12 @@ class ProductController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    codeController.dispose();
-    priceController.dispose();
-    minStockController.dispose();
-    qtyController.dispose();
-    newSerialController.dispose();
+    nameController.clear();
+    codeController.clear();
+    priceController.clear();
+    minStockController.clear();
+    qtyController.clear();
+    newSerialController.clear();
     super.onClose();
   }
 
@@ -93,13 +97,37 @@ class ProductController extends GetxController {
   }
 
   Future<void> fetchAllCategories() async {
-    final List<Category> allCategories = await dbHelper.getCategories();
-    categories.assignAll(allCategories);
+    isLoadingCategories.value = true;
+    try {
+      final List<Category> allCategories = await dbHelper.getCategories();
+      categories.assignAll(allCategories);
+    } catch (e) {
+      print('Error cargando categorías: $e');
+    } finally {
+      isLoadingCategories.value = false;
+    }
   }
 
   Future<void> fetchAllProviders() async {
-    final List<Provider> allProviders = await dbHelper.getProviders();
-    providers.assignAll(allProviders);
+    isLoadingProviders.value = true;
+    try {
+      final List<Provider> allProviders = await dbHelper.getProviders();
+      providers.assignAll(allProviders);
+    } catch (e) {
+      print('Error cargando proveedores: $e');
+    } finally {
+      isLoadingProviders.value = false;
+    }
+  }
+
+  Future<bool> hasCategoriesAndProviders() async {
+    if (categories.isEmpty) {
+      await fetchAllCategories();
+    }
+    if (providers.isEmpty) {
+      await fetchAllProviders();
+    }
+    return categories.isNotEmpty && providers.isNotEmpty;
   }
 
   void selectCategory(Category? category) {
@@ -125,12 +153,59 @@ class ProductController extends GetxController {
   }
 
   Future<void> saveProduct() async {
-    if (selectedCategory.value == null) {
-      print('Categoría no seleccionada');
+    if (nameController.text.trim().isEmpty ||
+        codeController.text.trim().isEmpty) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "El nombre y el código del producto no pueden estar vacíos.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
-    if (selectedProvider.value == null) {
-      print('Proveedor no seleccionado');
+
+    double? price = double.tryParse(priceController.text);
+    if (price == null || price < 0 || !_hasTwoOrFewerDecimals(price)) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message:
+        "El precio debe ser un número válido, positivo y con máximo dos decimales.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    int? serialsQty =
+    isSerial.value ? serials.length : int.tryParse(qtyController.text);
+    if (serialsQty == null || serialsQty < 0) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "La cantidad debe ser un número entero positivo.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    int? minStock = int.tryParse(minStockController.text);
+    if (minStock == null || minStock < 0) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "El stock mínimo debe ser un número entero positivo.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    if (selectedCategory.value == null || selectedProvider.value == null) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Debe seleccionar una categoría y un proveedor.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
       return;
     }
 
@@ -138,16 +213,14 @@ class ProductController extends GetxController {
       id: editingProductId.value.isEmpty
           ? null
           : int.parse(editingProductId.value),
-      name: nameController.text,
-      code: codeController.text,
-      price: double.tryParse(priceController.text) ?? 0.0,
-      serialsQty: isSerial.value
-          ? serials.length
-          : int.tryParse(qtyController.text) ?? 0,
-      minStock: int.tryParse(minStockController.text) ?? 0,
+      name: nameController.text.trim(),
+      code: codeController.text.trim(),
+      price: price,
+      serialsQty: serialsQty,
+      minStock: minStock,
       categoryId: selectedCategory.value!.id!,
       providerId: selectedProvider.value!.id!,
-      createdAt: DateTime.now(),
+      createdAt: DateTime.now().millisecondsSinceEpoch,
       isActive: true,
     );
 
@@ -162,7 +235,7 @@ class ProductController extends GetxController {
               productId: productId,
               status: "activo",
               serial: serialNumber,
-              createdAt: DateTime.now(),
+              createdAt: DateTime.now().millisecondsSinceEpoch,
             );
             await dbHelper.insertSerial(serial);
           }
@@ -198,43 +271,30 @@ class ProductController extends GetxController {
     }
   }
 
+  bool _hasTwoOrFewerDecimals(double number) {
+    return (number * 100).roundToDouble() == number * 100;
+  }
+
   Future<void> deactivateProduct(int productId) async {
     try {
       final product = await dbHelper.getProductById(productId);
       if (product != null) {
         product.isActive = false;
-        product.updatedAt = DateTime.now();
+        product.updatedAt = DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updateProduct(product);
         fetchAllProducts();
-        print('Producto desactivado con ID: $productId');
+        CustomSnackbar.show(
+          title: "¡Aprobado!",
+          message: "Producto borrado correctamente",
+          icon: Icons.check_circle,
+          backgroundColor: AppColors.principalGreen,
+        );
       } else {
         print('Producto con ID $productId no encontrado');
       }
     } catch (e) {
       print('Error al desactivar el producto: $e');
     }
-  }
-
-  void clearFields() {
-    nameController.clear();
-    codeController.clear();
-    priceController.clear();
-    minStockController.clear();
-    qtyController.clear();
-    newSerialController.clear();
-    providerId.value = 0;
-    categoryId.value = 0;
-    serials.clear();
-    categories.clear();
-    providers.clear();
-    newSerial.value = '';
-    selectedCategory.value = null;
-    selectedProvider.value = null;
-    newSerialController.clear();
-    qtyController.clear();
-    isSerial.value = false;
-    editingProductId.value = '';
-    hasSerials.value = false;
   }
 
   void toggleShowInactive(bool value) {
@@ -276,8 +336,8 @@ class ProductController extends GetxController {
               .toLowerCase()
               .contains(searchQuery.value.toLowerCase()) ||
           (product.code
-                  ?.toLowerCase()
-                  .contains(searchQuery.value.toLowerCase()) ??
+              ?.toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ??
               false);
 
       final matchesProvider = selectedProviderId.value == 0 ||
@@ -307,8 +367,10 @@ class ProductController extends GetxController {
     minStockController.text = product.minStock.toString();
     qtyController.text = product.serialsQty.toString();
 
-    selectCategory(categories.firstWhereOrNull((c) => c.id == product.categoryId));
-    selectProvider(providers.firstWhereOrNull((p) => p.id == product.providerId));
+    selectCategory(
+        categories.firstWhereOrNull((c) => c.id == product.categoryId));
+    selectProvider(
+        providers.firstWhereOrNull((p) => p.id == product.providerId));
 
     final serialsList = await dbHelper.getSerialsByProductId(product.id!);
     hasSerials.value = serialsList.isNotEmpty;
@@ -352,5 +414,30 @@ class ProductController extends GetxController {
         );
       },
     );
+  }
+
+  void clearFields() {
+    nameController.clear();
+    codeController.clear();
+    priceController.clear();
+    minStockController.clear();
+    qtyController.clear();
+    newSerialController.clear();
+    providerId.value = 0;
+    categoryId.value = 0;
+    newSerial.value = '';
+    selectedCategory.value = null;
+    selectedProvider.value = null;
+    newSerialController.clear();
+    qtyController.clear();
+    isSerial.value = false;
+    editingProductId.value = '';
+    hasSerials.value = false;
+  }
+
+  void clearLists() {
+    serials.clear();
+    categories.clear();
+    providers.clear();
   }
 }

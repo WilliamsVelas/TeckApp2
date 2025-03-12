@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:teck_app/app/modules/user/controllers/user_controller.dart';
 import 'package:teck_app/app/modules/user/widgets/user_form.dart';
 
@@ -70,13 +71,13 @@ class UserView extends GetView<UserController> {
               SizedBox(height: 16),
               InfoRow(
                 title: 'Creado: ',
-                text: formatDateTime(controller.user.value!.createdAt),
+                text: '${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(controller.user.value!.createdAt))}',
               ),
               SizedBox(height: 16),
               if (controller.user.value!.updatedAt != null) ...[
                 InfoRow(
                   title: 'Actualizado: ',
-                  text: formatDateTime(controller.user.value!.updatedAt!),
+                  text: '${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(controller.user.value!.updatedAt!))}',
                 ),
                 SizedBox(height: 16),
               ],

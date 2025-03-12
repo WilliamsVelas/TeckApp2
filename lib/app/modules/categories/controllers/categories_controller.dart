@@ -63,17 +63,24 @@ class CategoriesController extends GetxController {
     final isEditing = editingCategoryId.value.isNotEmpty;
     final categoryId = isEditing ? int.tryParse(editingCategoryId.value) : null;
 
+    final existingCategory =
+    categoryId != null ? categories.firstWhere((cat) => cat.id == categoryId) : null;
+
     final category = Category(
       id: categoryId,
       name: name.value,
       code: code?.value?.isEmpty ?? true ? null : code?.value,
       createdAt: categoryId == null
-          ? DateTime.now()
-          : categories.firstWhere((cat) => cat.id == categoryId).createdAt,
-      updatedAt: categoryId != null ? DateTime.now() : null,
+          ? DateTime.now().millisecondsSinceEpoch
+          : (existingCategory?.createdAt is int
+          ? existingCategory!.createdAt
+          : DateTime.parse(existingCategory!.createdAt.toString()).millisecondsSinceEpoch),
+      updatedAt: categoryId != null
+          ? DateTime.now().millisecondsSinceEpoch
+          : null,
       isActive: categoryId == null
           ? true
-          : categories.firstWhere((cat) => cat.id == categoryId).isActive,
+          : existingCategory?.isActive ?? true,
     );
 
     try {
@@ -81,7 +88,7 @@ class CategoriesController extends GetxController {
         await dbHelper.insertCategory(category);
         CustomSnackbar.show(
           title: "¡Aprobado!",
-          message: "Categoria guardada correctamente",
+          message: "Categoría guardada correctamente",
           icon: Icons.check_circle,
           backgroundColor: AppColors.principalGreen,
         );
@@ -89,7 +96,7 @@ class CategoriesController extends GetxController {
         await dbHelper.updateCategory(category);
         CustomSnackbar.show(
           title: "¡Aprobado!",
-          message: "Categoria editada correctamente",
+          message: "Categoría editada correctamente",
           icon: Icons.check_circle,
           backgroundColor: AppColors.principalGreen,
         );
@@ -113,7 +120,7 @@ class CategoriesController extends GetxController {
       final category = await dbHelper.getCategoryById(categoryId);
       if (category != null) {
         category.isActive = false;
-        category.updatedAt = DateTime.now();
+        category.updatedAt =  DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updateCategory(category);
         fetchAllCategories();
         print('Categoría desactivada con ID: $categoryId');

@@ -69,11 +69,11 @@ class PaymentMethodController extends GetxController {
       name: name.value,
       code: code.value,
       createdAt: paymentMethodId == null
-          ? DateTime.now()
+          ? DateTime.now().millisecondsSinceEpoch
           : paymentMethods
               .firstWhere((pm) => pm.id == paymentMethodId)
               .createdAt,
-      updatedAt: DateTime.now(),
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
       isActive: paymentMethodId == null
           ? true
           : paymentMethods
@@ -118,7 +118,7 @@ class PaymentMethodController extends GetxController {
           await dbHelper.getPaymentMethodById(paymentMethodId);
       if (paymentMethod != null) {
         paymentMethod.isActive = false;
-        paymentMethod.updatedAt = DateTime.now();
+        paymentMethod.updatedAt = DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updatePaymentMethod(paymentMethod);
         fetchAllPaymentMethods();
         print('Método de pago desactivado con ID: $paymentMethodId');

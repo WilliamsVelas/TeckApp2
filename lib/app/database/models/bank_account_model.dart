@@ -4,8 +4,8 @@ class BankAccount {
   String numberAccount;
   String code;
   int clientId;
-  DateTime createdAt;
-  DateTime? updatedAt;
+  int createdAt;
+  int? updatedAt;
   bool isActive;
 
   BankAccount({
@@ -26,8 +26,8 @@ class BankAccount {
       'numberAccount': numberAccount,
       'code': code,
       'clientId': clientId,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
     };
   }
@@ -39,10 +39,8 @@ class BankAccount {
       numberAccount: map['numberAccount'] as String,
       code: map['code'] as String,
       clientId: map['clientId'] as int,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt'] as String)
-          : null,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,
     );
   }

@@ -2,8 +2,8 @@ class Category {
   int? id;
   String name;
   String? code;
-  DateTime createdAt;
-  DateTime? updatedAt;
+  int createdAt;
+  int? updatedAt;
   bool isActive;
 
   Category({
@@ -20,8 +20,8 @@ class Category {
       'id': id,
       'name': name,
       'code': code,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
     };
   }
@@ -31,10 +31,8 @@ class Category {
       id: map['id'] as int?,
       name: map['name'] as String,
       code: map['code'] as String?,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt'] as String)
-          : null,
+      createdAt: map['createdAt'] as int,
+      updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,
     );
   }

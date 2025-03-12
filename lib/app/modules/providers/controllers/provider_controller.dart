@@ -72,9 +72,9 @@ class ProviderController extends GetxController {
       businessName: businessName.value,
       value: value.value,
       createdAt: providerId == null
-          ? DateTime.now()
+          ? DateTime.now().millisecondsSinceEpoch
           : providers.firstWhere((p) => p.id == providerId).createdAt,
-      updatedAt: providerId != null ? DateTime.now() : null,
+      updatedAt: providerId != null ? DateTime.now().millisecondsSinceEpoch : null,
       isActive: providerId == null
           ? true
           : providers.firstWhere((p) => p.id == providerId).isActive,
@@ -100,7 +100,7 @@ class ProviderController extends GetxController {
       final provider = await dbHelper.getProviderById(providerId);
       if (provider != null) {
         provider.isActive = false;
-        provider.updatedAt = DateTime.now();
+        provider.updatedAt = DateTime.now().millisecondsSinceEpoch;
         await dbHelper.updateProvider(provider);
         fetchAllProviders();
         print('Proveedor desactivado con ID: $providerId');
