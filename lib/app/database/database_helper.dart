@@ -725,25 +725,25 @@ class DatabaseHelper {
       int startDate, int endDate) async {
     final db = await database;
 
-    print("end date = $endDate start date = $startDate");
-
     final query = '''
-  SELECT 
-    i.id AS invoiceId,
-    i.documentNo,
-    i.createdAt AS invoiceDate,
-    il.productName,
-    il.productPrice,
-    il.qty,
-    il.productSerial,
-    il.total AS lineTotal
-  FROM invoices i
-  INNER JOIN invoiceLine il ON i.id = il.invoiceId
+    SELECT 
+      i.id AS invoiceId,
+      i.documentNo,
+      i.createdAt AS invoiceDate,
+      il.productName,
+      il.productPrice,
+      il.qty,
+      il.productSerial,
+      il.total AS lineTotal
+    FROM invoices i
+    INNER JOIN invoiceLine il ON i.id = il.invoiceId
+    WHERE i.createdAt >= ? AND i.createdAt <= ?
+    ORDER BY i.createdAt ASC
+  ''';
 
-  ORDER BY il.createdAt ASC
-''';
+    final result = await db.rawQuery(query, [startDate, endDate]);
+    result.forEach((row) => print(row));
 
-    final result = await db.rawQuery(query);
     return result;
   }
 }

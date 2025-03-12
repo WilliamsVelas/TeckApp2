@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/clients_controller.dart';
 
 class ClientForm extends StatelessWidget {
@@ -36,6 +37,7 @@ class ClientForm extends StatelessWidget {
               onChanged: (value) => clientController.name.value = value,
               controller: TextEditingController()
                 ..text = clientController.name.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -45,6 +47,7 @@ class ClientForm extends StatelessWidget {
               onChanged: (value) => clientController.lastName.value = value,
               controller: TextEditingController()
                 ..text = clientController.lastName.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -54,16 +57,18 @@ class ClientForm extends StatelessWidget {
               onChanged: (value) => clientController.businessName.value = value,
               controller: TextEditingController()
                 ..text = clientController.businessName.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
               label: 'Código de Afiliado',
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
               icon: Icons.confirmation_number,
               onChanged: (value) =>
                   clientController.affiliateCode.value = value,
               controller: TextEditingController()
                 ..text = clientController.affiliateCode.value,
+              inputFormatters: InputFormatters.numericCode(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -73,6 +78,7 @@ class ClientForm extends StatelessWidget {
               onChanged: (value) => clientController.value.value = value,
               controller: TextEditingController()
                 ..text = clientController.value.value,
+              inputFormatters: InputFormatters.value(),
             ),
             SizedBox(height: 32.0),
             Row(

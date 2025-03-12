@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/categories_controller.dart';
 
 class CategoryForm extends StatelessWidget {
@@ -36,6 +37,7 @@ class CategoryForm extends StatelessWidget {
               icon: Icons.category,
               onChanged: (value) => categoryController.name.value = value,
               controller: TextEditingController()..text = categoryController.name.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
 
@@ -45,6 +47,7 @@ class CategoryForm extends StatelessWidget {
               icon: Icons.code,
               onChanged: (value) => categoryController.code?.value = value,
               controller: TextEditingController()..text = categoryController.code?.value ?? '',
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 32.0),
 

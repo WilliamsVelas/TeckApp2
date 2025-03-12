@@ -154,19 +154,26 @@ class InvoiceView extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Ordenar facturas'),
+          backgroundColor: AppColors.principalBackground,
+          title: Text(
+            'Ordenar facturas',
+            style: TextStyle(color: AppColors.principalWhite),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                title: const Text('Fecha de creación'),
+              _buildSortOption(
+                context,
+                title: 'Fecha de creación',
                 onTap: () {
                   controller.sortInvoices("date");
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                title: const Text('Total'),
+              SizedBox(height: 8.0),
+              _buildSortOption(
+                context,
+                title: 'Total',
                 onTap: () {
                   controller.sortInvoices("totalAmount");
                   Navigator.pop(context);
@@ -174,8 +181,47 @@ class InvoiceView extends StatelessWidget {
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.principalWhite),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildSortOption(BuildContext context, {required String title, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        margin: EdgeInsets.only(bottom: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: AppColors.principalGray,
+                fontSize: 14,
+              ),
+            ),
+            Icon(
+              Icons.sort,
+              color: AppColors.principalGray,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -184,30 +230,77 @@ class InvoiceView extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Filtrar ventas'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Obx(
-                    () => Checkbox(
-                      value: controller.showUnpaidOnly.value,
-                      onChanged: (value) =>
-                          controller.toggleUnpaidFilter(value ?? false),
-                      activeColor: AppColors.principalGreen,
-                    ),
-                  ),
-                  Text(
-                    'Mostrar solo ventas no pagadas',
-                    style: TextStyle(color: AppColors.principalWhite),
-                  ),
-                ],
-              ),
-            ],
+          backgroundColor: AppColors.principalBackground,
+          title: Text(
+            'Filtrar ventas',
+            style: TextStyle(color: AppColors.principalWhite),
           ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Obx(
+                      () => _buildFilterSwitch(
+                    title: 'Mostrar pagos pendientes.',
+                    value: controller.showUnpaidOnly.value,
+                    onChanged: (value) => controller.toggleUnpaidFilter(value),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.principalWhite),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildFilterSwitch({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.principalGreen,
+            inactiveThumbColor: AppColors.principalGray,
+            inactiveTrackColor: Colors.grey[300],
+          ),
+          Flexible(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: AppColors.principalGray,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

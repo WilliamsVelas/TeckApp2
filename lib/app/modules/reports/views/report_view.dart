@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../theme/colors.dart';
 import '../../../common/custom_snakcbar.dart';
 import '../controllers/report_controller.dart';
+import '../widgets/date_selector.dart';
 
 class ReportView extends GetView<ReportController> {
   @override
@@ -81,62 +82,62 @@ class ReportView extends GetView<ReportController> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Seleccione el rango de fechas'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('Fecha de inicio'),
-                subtitle: Text(
-                  startDate != null
-                      ? DateFormat('dd/MM/yyyy').format(startDate!)
-                      : 'No seleccionada',
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      startDate = picked;
-                      (context as Element).markNeedsBuild();
-                    }
-                  },
-                ),
-              ),
-              ListTile(
-                title: Text('Fecha de fin'),
-                subtitle: Text(
-                  endDate != null
-                      ? DateFormat('dd/MM/yyyy').format(endDate!)
-                      : 'No seleccionada',
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      endDate = picked;
-                      (context as Element).markNeedsBuild();
-                    }
-                  },
-                ),
-              ),
-            ],
+          backgroundColor: AppColors.principalBackground,
+          title: Text(
+            'Seleccione el rango de fechas',
+            style: TextStyle(color: AppColors.principalWhite),
+          ),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DateSelector(
+                    label: 'Fecha de inicio',
+                    selectedDate: startDate,
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        startDate =
+                            DateTime(picked.year, picked.month, picked.day);
+                        setState(() {});
+                      }
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                  DateSelector(
+                    label: 'Fecha de fin',
+                    selectedDate: endDate,
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        endDate = DateTime(picked.year, picked.month,
+                            picked.day, 23, 59, 59, 999);
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ],
+              );
+            },
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.principalWhite),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -151,8 +152,9 @@ class ReportView extends GetView<ReportController> {
                 }
 
                 final salesReports = await controller.fetchSalesReport(
-                    startDate!.millisecondsSinceEpoch!,
-                    endDate!.millisecondsSinceEpoch!);
+                  startDate!.millisecondsSinceEpoch,
+                  endDate!.millisecondsSinceEpoch,
+                );
                 if (salesReports.isEmpty) {
                   CustomSnackbar.show(
                     title: "¡Ocurrió un error!",
@@ -167,7 +169,13 @@ class ReportView extends GetView<ReportController> {
                 Navigator.pop(context);
                 await controller.generateSalesReportPdf(salesReports);
               },
-              child: Text('Generar PDF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.principalButton,
+              ),
+              child: Text(
+                'Generar PDF',
+                style: TextStyle(color: AppColors.onPrincipalBackground),
+              ),
             ),
           ],
         );

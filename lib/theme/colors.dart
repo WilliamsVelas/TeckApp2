@@ -25,6 +25,6 @@ class AppColors {
   static const principalGrayFont = Color(0xFF666666);
 
   //Reports
-  static const header = Color(0xFFA0D6F5);
-  static const subHeader = Color(0xFF99C738);
+  static const header = Color(0xFFBCE3FD);
+  static const subHeader = Color(0xFFDAF191);
 }

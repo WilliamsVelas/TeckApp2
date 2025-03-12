@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/user_controller.dart';
 
 class UserForm extends StatelessWidget {
@@ -24,6 +25,7 @@ class UserForm extends StatelessWidget {
               icon: Icons.person,
               controller: controller.nameController,
               onChanged: (value) => controller.nameController.text = value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -32,6 +34,7 @@ class UserForm extends StatelessWidget {
               icon: Icons.person_outline,
               controller: controller.lastNameController,
               onChanged: (value) => controller.lastNameController.text = value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -40,6 +43,7 @@ class UserForm extends StatelessWidget {
               icon: Icons.account_circle,
               controller: controller.usernameController,
               onChanged: (value) => controller.usernameController.text = value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 32.0),
             Row(

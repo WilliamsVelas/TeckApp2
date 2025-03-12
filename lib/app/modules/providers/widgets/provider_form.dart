@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/provider_controller.dart';
 
 class ProviderForm extends StatelessWidget {
@@ -36,6 +37,7 @@ class ProviderForm extends StatelessWidget {
               onChanged: (value) => providerController.name.value = value,
               controller: TextEditingController()
                 ..text = providerController.name.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -45,6 +47,7 @@ class ProviderForm extends StatelessWidget {
               onChanged: (value) => providerController.lastName.value = value,
               controller: TextEditingController()
                 ..text = providerController.lastName.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -55,6 +58,7 @@ class ProviderForm extends StatelessWidget {
                   providerController.businessName.value = value,
               controller: TextEditingController()
                 ..text = providerController.businessName.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -64,6 +68,7 @@ class ProviderForm extends StatelessWidget {
               onChanged: (value) => providerController.value.value = value,
               controller: TextEditingController()
                 ..text = providerController.value.value,
+              inputFormatters: InputFormatters.value(),
             ),
             SizedBox(height: 32.0),
             Row(

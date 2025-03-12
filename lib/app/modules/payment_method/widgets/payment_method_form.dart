@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/payment_method_controller.dart';
 
 class PaymentMethodForm extends StatelessWidget {
@@ -36,6 +37,7 @@ class PaymentMethodForm extends StatelessWidget {
               icon: Icons.payment,
               onChanged: (value) => paymentMethodController.name.value = value,
               controller: TextEditingController()..text = paymentMethodController.name.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
 
@@ -45,6 +47,7 @@ class PaymentMethodForm extends StatelessWidget {
               icon: Icons.code,
               onChanged: (value) => paymentMethodController.code.value = value,
               controller: TextEditingController()..text = paymentMethodController.code.value,
+              inputFormatters: InputFormatters.numericCode(),
             ),
             SizedBox(height: 32.0),
 

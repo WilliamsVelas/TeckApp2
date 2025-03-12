@@ -24,7 +24,7 @@ class CustomSnackbar {
       borderRadius: 8,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 3),
       isDismissible: true,
       shouldIconPulse: false,
       icon: Icon(icon, color: iconColor, size: 18),

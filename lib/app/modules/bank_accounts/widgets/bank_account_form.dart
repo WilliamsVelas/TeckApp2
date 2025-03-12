@@ -6,6 +6,7 @@ import 'package:get/get_core/src/get_main.dart';
 import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
 import '../../../database/models/clients_model.dart';
+import '../../../utils/input_validations.dart';
 import '../controller/bank_account_controller.dart';
 
 class BankAccountForm extends StatelessWidget {
@@ -37,15 +38,17 @@ class BankAccountForm extends StatelessWidget {
                   bankAccountController.bankName.value = value,
               controller: TextEditingController()
                 ..text = bankAccountController.bankName.value,
+              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
               label: 'Código',
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
               icon: Icons.code,
               onChanged: (value) => bankAccountController.code.value = value,
               controller: TextEditingController()
                 ..text = bankAccountController.code.value,
+              inputFormatters: InputFormatters.numericCode(),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -56,6 +59,7 @@ class BankAccountForm extends StatelessWidget {
                   bankAccountController.numberAccount.value = value,
               controller: TextEditingController()
                 ..text = bankAccountController.numberAccount.value,
+              inputFormatters: InputFormatters.numericCode(),
             ),
             SizedBox(height: 16.0),
             Obx(

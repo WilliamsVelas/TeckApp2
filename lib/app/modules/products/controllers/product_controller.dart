@@ -169,7 +169,7 @@ class ProductController extends GetxController {
       CustomSnackbar.show(
         title: "¡Ocurrió un error!",
         message:
-        "El precio debe ser un número válido, positivo y con máximo dos decimales.",
+            "El precio debe ser un número válido, positivo y con máximo dos decimales.",
         icon: Icons.cancel,
         backgroundColor: AppColors.invalid,
       );
@@ -177,7 +177,7 @@ class ProductController extends GetxController {
     }
 
     int? serialsQty =
-    isSerial.value ? serials.length : int.tryParse(qtyController.text);
+        isSerial.value ? serials.length : int.tryParse(qtyController.text);
     if (serialsQty == null || serialsQty < 0) {
       CustomSnackbar.show(
         title: "¡Ocurrió un error!",
@@ -316,6 +316,11 @@ class ProductController extends GetxController {
 
   void filterByStatus(String? status) {
     selectedStatus.value = status ?? '';
+    if (status == 'Inactivo') {
+      showInactive.value = true;
+    } else if (status == 'Activo') {
+      showInactive.value = false;
+    }
     applyFilters();
   }
 
@@ -336,14 +341,16 @@ class ProductController extends GetxController {
               .toLowerCase()
               .contains(searchQuery.value.toLowerCase()) ||
           (product.code
-              ?.toLowerCase()
-              .contains(searchQuery.value.toLowerCase()) ??
+                  ?.toLowerCase()
+                  .contains(searchQuery.value.toLowerCase()) ??
               false);
 
       final matchesProvider = selectedProviderId.value == 0 ||
           product.providerId == selectedProviderId.value;
 
-      final matchesStatus = showInactive.value || product.isActive;
+      final matchesStatus = selectedStatus.value.isEmpty ||
+          (selectedStatus.value == 'Activo' && product.isActive) ||
+          (selectedStatus.value == 'Inactivo' && !product.isActive);
 
       return matchesSearch && matchesProvider && matchesStatus;
     }).toList();

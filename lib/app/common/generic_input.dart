@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class GenericInput extends StatelessWidget {
   const GenericInput({
@@ -50,6 +51,7 @@ class GenericFormInput extends StatelessWidget {
   final IconData icon;
   final Function(String) onChanged;
   final TextEditingController controller;
+  final List<TextInputFormatter>? inputFormatters;
 
   const GenericFormInput({
     super.key,
@@ -58,6 +60,7 @@ class GenericFormInput extends StatelessWidget {
     required this.icon,
     required this.onChanged,
     required this.controller,
+    this.inputFormatters,
   });
 
   @override
@@ -66,6 +69,7 @@ class GenericFormInput extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),

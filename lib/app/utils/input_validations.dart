@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 class ValidationResult {
   final bool isValid;
   final String? errorMessage;
@@ -56,5 +58,63 @@ class Validators {
       return 'Debe ser un entero válido mayor a 0';
     }
     return '';
+  }
+}
+
+class InputFormatters {
+  static List<TextInputFormatter> textOnly() {
+    return [
+      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+    ];
+  }
+
+  static List<TextInputFormatter> value() {
+    return [
+      TextInputFormatter.withFunction((oldValue, newValue) {
+        final text = newValue.text;
+        if (text.isEmpty) return newValue;
+        if (text.length == 1 && RegExp(r'^[JVE]$').hasMatch(text)) {
+          return newValue;
+        }
+        if (!RegExp(r'^[JVE][0-9]{0,9}$').hasMatch(text)) {
+          return oldValue;
+        }
+        if (text.length > 10) {
+          return oldValue;
+        }
+        return newValue;
+      }),
+      FilteringTextInputFormatter.allow(RegExp(r'[JVE0-9]')),
+    ];
+  }
+
+  static List<TextInputFormatter> numeric() {
+    return [
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+      TextInputFormatter.withFunction((oldValue, newValue) {
+        final text = newValue.text;
+        if (text.isEmpty) return newValue;
+        if (!RegExp(r'^\d*\.?\d{0,2}$').hasMatch(text)) {
+          return oldValue;
+        }
+        return newValue;
+      }),
+    ];
+  }
+
+  static List<TextInputFormatter> numericCode() {
+    return [
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+      TextInputFormatter.withFunction(
+        (oldValue, newValue) {
+          final text = newValue.text;
+          if (text.isEmpty) return newValue;
+          if (!RegExp(r'^\d+$').hasMatch(text)) {
+            return oldValue;
+          }
+          return newValue;
+        },
+      ),
+    ];
   }
 }

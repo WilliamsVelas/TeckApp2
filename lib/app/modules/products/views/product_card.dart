@@ -45,7 +45,7 @@ class ProductCard extends StatelessWidget {
                         if (snapshot.hasData) {
                           return Text(
                             snapshot.data!,
-                            style: TextStyle(color: AppColors.principalWhite),
+                            style: TextStyle(color: AppColors.principalWhite, fontWeight: FontWeight.normal),
                           );
                         } else {
                           return Text('Cargando...',
@@ -55,7 +55,6 @@ class ProductCard extends StatelessWidget {
                     ),
                     Text(
                       product.isActive ? 'Activo' : 'Inactivo',
-                      // Mostrar estado
                       style: TextStyle(
                         fontSize: 12,
                         color: product.isActive ? Colors.green : Colors.red,
@@ -94,7 +93,7 @@ class ProductCard extends StatelessWidget {
                         if (snapshot.hasData) {
                           return Text(
                             snapshot.data!,
-                            style: TextStyle(color: AppColors.principalWhite),
+                            style: TextStyle(color: AppColors.principalGray, fontWeight: FontWeight.normal),
                           );
                         } else {
                           return Text('Cargando...',

@@ -8,6 +8,7 @@ import '../../../../theme/colors.dart';
 import '../../../common/generic_input.dart';
 import '../../../database/models/products_model.dart';
 import '../../../database/models/serials_model.dart';
+import '../../../utils/input_validations.dart';
 import '../controllers/invoice_controller.dart';
 
 class InvoiceForm extends StatelessWidget {
@@ -23,10 +24,11 @@ class InvoiceForm extends StatelessWidget {
           children: [
             GenericFormInput(
               label: 'Número del documento',
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
               icon: Icons.insert_drive_file,
               onChanged: (value) => invoiceController.documentNo.value = value,
               controller: TextEditingController()..text = invoiceController.documentNo.value,
+              inputFormatters: InputFormatters.numericCode(),
             ),
             SizedBox(height: 16.0),
             Obx(
@@ -69,6 +71,7 @@ class InvoiceForm extends StatelessWidget {
                       invoiceController.selectedQty.value = int.tryParse(value) ?? 1,
                       controller: TextEditingController()
                         ..text = invoiceController.selectedQty.value.toString(),
+                      inputFormatters: InputFormatters.numericCode(),
                     ),
                   ),
                   if (invoiceController.selectedProduct.value != null)
@@ -131,6 +134,7 @@ class InvoiceForm extends StatelessWidget {
               icon: Icons.money,
               onChanged: (value) => invoiceController.totalPayed.value = value,
               controller: TextEditingController()..text = invoiceController.totalPayed.value,
+              inputFormatters: InputFormatters.numeric(),
             ),
             SizedBox(height: 16.0),
             Obx(

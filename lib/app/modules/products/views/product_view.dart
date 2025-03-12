@@ -152,36 +152,85 @@ class ProductView extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Filtrar productos'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String?>(
-                value: controller.selectedStatus.value.isEmpty
-                    ? null
-                    : controller.selectedStatus.value,
-                hint: const Text("Seleccionar Estado"),
-                onChanged: (value) {
-                  controller.filterByStatus(value);
-                  Navigator.pop(context);
-                },
-                items: [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text('Todos los estados'),
-                  ),
-                  ...['Activo', 'Inactivo'].map(
-                    (status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status),
-                    ),
-                  )
-                ],
-              ),
-            ],
+          backgroundColor: AppColors.principalBackground,
+          title: Text(
+            'Filtrar productos',
+            style: TextStyle(color: AppColors.principalWhite),
           ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Obx(
+                      () => _buildStatusDropdown(
+                    value: controller.selectedStatus.value.isEmpty
+                        ? null
+                        : controller.selectedStatus.value,
+                    onChanged: (value) {
+                      controller.filterByStatus(value);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.principalWhite),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildStatusDropdown({
+    required String? value,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: DropdownButton<String?>(
+        value: value,
+        hint: Text(
+          "Seleccionar Estado",
+          style: TextStyle(color: AppColors.principalGray),
+        ),
+        onChanged: onChanged,
+        items: [
+          DropdownMenuItem<String?>(
+            value: null,
+            child: Text(
+              'Todos los estados',
+              style: TextStyle(color: AppColors.principalGray),
+            ),
+          ),
+          ...['Activo', 'Inactivo'].map(
+                (status) => DropdownMenuItem<String>(
+              value: status,
+              child: Text(
+                status,
+                style: TextStyle(color: AppColors.principalGray),
+              ),
+            ),
+          ),
+        ],
+        isExpanded: true,
+        underline: SizedBox(),
+        icon: Icon(Icons.arrow_drop_down, color: AppColors.principalGray),
+      ),
     );
   }
 
@@ -190,26 +239,35 @@ class ProductView extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Ordenar productos'),
+          backgroundColor: AppColors.principalBackground,
+          title: Text(
+            'Ordenar productos',
+            style: TextStyle(color: AppColors.principalWhite),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                title: const Text('Fecha de creación'),
+              _buildSortOption(
+                context,
+                title: 'Fecha de creación',
                 onTap: () {
                   controller.sortProducts("date");
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                title: const Text('Precio'),
+              SizedBox(height: 8.0),
+              _buildSortOption(
+                context,
+                title: 'Precio',
                 onTap: () {
                   controller.sortProducts("price");
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                title: const Text('Min Stock'),
+              SizedBox(height: 8.0),
+              _buildSortOption(
+                context,
+                title: 'Min Stock',
                 onTap: () {
                   controller.sortProducts("stock");
                   Navigator.pop(context);
@@ -217,8 +275,46 @@ class ProductView extends StatelessWidget {
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.principalWhite),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildSortOption(BuildContext context, {required String title, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: AppColors.principalGray,
+                fontSize: 14,
+              ),
+            ),
+            Icon(
+              Icons.sort,
+              color: AppColors.principalGray,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
