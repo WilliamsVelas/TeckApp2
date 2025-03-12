@@ -6,6 +6,7 @@ environment:
   sdk: ^3.6.0
 
 dependencies:
+  share_plus: ^10.1.4
   printing: ^5.14.2
   pdf: ^3.11.3
   fl_chart: ^0.68.0
