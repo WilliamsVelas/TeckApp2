@@ -20,7 +20,7 @@ class ProductCard extends StatelessWidget {
     RxBool isExpanded = false.obs;
 
     return Obx(
-      () => GestureDetector(
+          () => GestureDetector(
         onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: product.serialsQty <= product.minStock
@@ -44,7 +44,7 @@ class ProductCard extends StatelessWidget {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Text(
-                            snapshot.data!,
+                            "Proveedor: ${ snapshot.data!}",
                             style: TextStyle(color: AppColors.principalWhite, fontWeight: FontWeight.normal),
                           );
                         } else {
@@ -132,9 +132,9 @@ class ProductCard extends StatelessWidget {
                           ),
                           onPressed: product.isActive
                               ? () {
-                                  controller.editProduct(product);
-                                  isExpanded.value = false;
-                                }
+                            controller.editProduct(product);
+                            isExpanded.value = false;
+                          }
                               : null,
                         ),
                         IconButton(
@@ -144,9 +144,9 @@ class ProductCard extends StatelessWidget {
                           ),
                           onPressed: product.isActive
                               ? () {
-                                  controller.deactivateProduct(product.id!);
-                                  isExpanded.value = false;
-                                }
+                            controller.deactivateProduct(product.id!);
+                            isExpanded.value = false;
+                          }
                               : null,
                         ),
                       ],

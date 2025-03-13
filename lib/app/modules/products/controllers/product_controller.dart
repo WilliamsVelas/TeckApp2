@@ -18,6 +18,7 @@ class ProductController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxString selectedStatus = ''.obs;
   final RxInt selectedProviderId = 0.obs;
+  final RxInt selectedCategoryId = 0.obs;
   final RxString sortCriteria = ''.obs;
   final RxBool showInactive = false.obs;
 
@@ -58,7 +59,6 @@ class ProductController extends GetxController {
   final RxString editingProductId = ''.obs;
   final RxBool hasSerials = false.obs;
 
-  // Estados de carga
   final RxBool isLoadingCategories = false.obs;
   final RxBool isLoadingProviders = false.obs;
 
@@ -68,6 +68,7 @@ class ProductController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAllProducts();
+    fetchAllCategories();
   }
 
   @override
@@ -275,8 +276,23 @@ class ProductController extends GetxController {
     return (number * 100).roundToDouble() == number * 100;
   }
 
+  Future<bool> canDeactivateProduct(int productId) async {
+    return await dbHelper.hasUnpaidInvoicesForProduct(productId);
+  }
+
   Future<void> deactivateProduct(int productId) async {
     try {
+      final hasUnpaid = await canDeactivateProduct(productId);
+      if (hasUnpaid) {
+        CustomSnackbar.show(
+          title: "¡Acción no permitida!",
+          message: "No puedes desactivar un producto con ventas impagas.",
+          icon: Icons.cancel,
+          backgroundColor: AppColors.invalid,
+        );
+        return;
+      }
+
       final product = await dbHelper.getProductById(productId);
       if (product != null) {
         product.isActive = false;
@@ -329,6 +345,11 @@ class ProductController extends GetxController {
     applyFilters();
   }
 
+  void filterByCategory(int? categoryId) {
+    selectedCategoryId.value = categoryId ?? 0;
+    applyFilters();
+  }
+
   void sortProducts(String criteria) {
     sortCriteria.value = criteria;
     applyFilters();
@@ -345,14 +366,17 @@ class ProductController extends GetxController {
                   .contains(searchQuery.value.toLowerCase()) ??
               false);
 
-      final matchesProvider = selectedProviderId.value == 0 ||
-          product.providerId == selectedProviderId.value;
+      // final matchesProvider = selectedProviderId.value == 0 ||
+      //     product.providerId == selectedProviderId.value;
+
+      final matchesCategory = selectedCategoryId.value == 0 ||
+          product.categoryId == selectedCategoryId.value;
 
       final matchesStatus = selectedStatus.value.isEmpty ||
           (selectedStatus.value == 'Activo' && product.isActive) ||
           (selectedStatus.value == 'Inactivo' && !product.isActive);
 
-      return matchesSearch && matchesProvider && matchesStatus;
+      return matchesSearch && matchesStatus && matchesCategory;
     }).toList();
 
     if (sortCriteria.value == 'date') {
@@ -381,7 +405,9 @@ class ProductController extends GetxController {
 
     final serialsList = await dbHelper.getSerialsByProductId(product.id!);
     hasSerials.value = serialsList.isNotEmpty;
+
     if (hasSerials.value) {
+      isSerial.value = true;
       serials.assignAll(serialsList.map((s) => s.serial));
     }
 

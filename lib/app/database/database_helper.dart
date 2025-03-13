@@ -279,6 +279,26 @@ class DatabaseHelper {
     });
   }
 
+  Future<bool> hasUnpaidInvoicesForProduct(int productId) async {
+    final db = await database;
+
+    final query = '''
+    SELECT COUNT(*) as count
+    FROM invoiceLine il
+    INNER JOIN invoices i ON il.invoiceId = i.id
+    WHERE il.productId = ?
+      AND i.type = 'INV_N_P'
+      AND (i.totalPayed < i.totalAmount OR i.totalPayed IS NULL OR i.totalPayed = 0)
+      AND i.isActive = 1
+      AND il.isActive = 1
+  ''';
+
+    final result = await db.rawQuery(query, [productId]);
+    final count = result.first['count'] as int;
+
+    return count > 0;
+  }
+
   // Categories
   Future<int> insertCategory(Category category) async {
     final db = await database;
