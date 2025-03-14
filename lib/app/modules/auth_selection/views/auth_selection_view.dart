@@ -15,9 +15,12 @@ class AuthSelectionView extends GetView<AuthSelectionController> {
       body: Stack(
         children: [
           Center(
-            child: SvgPicture.asset(
-              'assets/images/logo.svg',
-              height: 100,
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: Image.asset(
+                'assets/images/logo.png',
+              ),
             ),
           ),
           Align(
