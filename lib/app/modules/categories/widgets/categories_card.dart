@@ -79,7 +79,7 @@ class CategoryCard extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(
-                            Icons.delete,
+                            Icons.clear,
                             color: AppColors.invalid,
                           ),
                           onPressed: category.isActive

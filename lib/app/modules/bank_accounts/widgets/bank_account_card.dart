@@ -106,7 +106,7 @@ class BankAccountCard extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(
-                            Icons.delete,
+                            Icons.clear,
                             color: AppColors.invalid,
                           ),
                           onPressed: bankAccount.isActive

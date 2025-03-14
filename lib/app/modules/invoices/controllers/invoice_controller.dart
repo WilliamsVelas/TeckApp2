@@ -8,8 +8,11 @@ import '../../../database/database_helper.dart';
 import '../../../database/models/clients_model.dart';
 import '../../../database/models/invoice_lines_model.dart';
 import '../../../database/models/invoices_model.dart';
+import '../../../database/models/payment.dart';
+import '../../../database/models/payment_method_model.dart';
 import '../../../database/models/products_model.dart';
 import '../../../database/models/serials_model.dart';
+import '../views/invoice_view.dart';
 import '../widgets/invoice_card.dart';
 
 class InvoiceController extends GetxController {
@@ -33,12 +36,18 @@ class InvoiceController extends GetxController {
   final RxDouble invoiceTotal = 0.0.obs;
 
   final RxString documentNo = ''.obs;
+  final RxString note = ''.obs;
   final RxString totalPayed = ''.obs;
   final RxString type = ''.obs;
 
   final RxInt selectedQty = 1.obs;
 
   final RxBool showUnpaidOnly = false.obs;
+
+  final RxList<Payment> payments = <Payment>[].obs;
+  final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
+  final Rx<PaymentMethod?> selectedPaymentMethod = Rx<PaymentMethod?>(null);
+  final RxString paymentAmount = ''.obs;
 
   final DatabaseHelper dbHelper = DatabaseHelper();
 
@@ -51,6 +60,32 @@ class InvoiceController extends GetxController {
   void fetchAll() {
     fetchAllProducts();
     fetchAllClients();
+    fetchAllPaymentMethods();
+  }
+
+  Future<void> setNextDocumentNo() async {
+    final lastInvoice = await getLastInvoice();
+    int nextNumber = 1;
+    if (lastInvoice != null) {
+      final lastNumber = lastInvoice.id ?? 0;
+      nextNumber = lastNumber + 1;
+    }
+
+    final formattedNumber = nextNumber.toString().padLeft(5, '0');
+    documentNo.value = formattedNumber;
+  }
+
+  Future<Invoice?> getLastInvoice() async {
+    final db = await dbHelper.database;
+    final result = await db.query(
+      'invoices',
+      orderBy: 'id DESC',
+      limit: 1,
+    );
+    if (result.isNotEmpty) {
+      return Invoice.fromMap(result.first);
+    }
+    return null;
   }
 
   Future<void> fetchAllClients() async {
@@ -68,14 +103,26 @@ class InvoiceController extends GetxController {
     products.assignAll(allProducts);
   }
 
+  Future<void> fetchAllPaymentMethods() async {
+    final List<PaymentMethod> allPaymentMethods =
+        await dbHelper.getPaymentMethods();
+    paymentMethods.assignAll(allPaymentMethods.where((pm) => pm.isActive));
+  }
+
+  void selectPaymentMethod(PaymentMethod? method) {
+    selectedPaymentMethod.value = method;
+  }
+
   void selectProduct(Product? product) async {
     selectedProduct.value = product;
     availableSerials.clear();
     selectedSerial.value = null;
     selectedQty.value = 1;
     if (product != null) {
-      final List<Serial> serials = await dbHelper.getSerialsByProductId(product.id!);
-      availableSerials.assignAll(serials.where((serial) => serial.status == 'activo'));
+      final List<Serial> serials =
+          await dbHelper.getSerialsByProductId(product.id!);
+      availableSerials
+          .assignAll(serials.where((serial) => serial.status == 'activo'));
     }
   }
 
@@ -170,11 +217,65 @@ class InvoiceController extends GetxController {
     return totalAmount - parsedTotalPayed;
   }
 
-  Future<void> saveInvoice() async {
+  double calculateRemainingBalance() {
+    final totalAmount = calculateTotalAmount();
+    final totalPaid =
+        payments.fold(0.0, (sum, payment) => sum + payment.amount);
+    return totalAmount - totalPaid;
+  }
+
+  void addPayment() {
+    if (selectedPaymentMethod.value == null) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "Debe seleccionar un método de pago.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    final amount = double.tryParse(paymentAmount.value) ?? 0.0;
+    final remainingBalance = calculateRemainingBalance();
+
+    if (amount <= 0) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "El monto debe ser mayor a cero.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    if (amount > remainingBalance) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "El monto excede el saldo pendiente de $remainingBalance.",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+      return;
+    }
+
+    final payment = Payment(
+      invoiceId: 0,
+      paymentMethodId: selectedPaymentMethod!.value!.id!,
+      amount: amount,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    payments.add(payment);
+    paymentAmount.value = '';
+    selectedPaymentMethod.value = null;
+    invoiceTotal.value = calculateTotalAmount();
+  }
+
+  Future<void> saveInvoice({bool isUpdate = false}) async {
     if (invoiceLines.isEmpty) {
       CustomSnackbar.show(
         title: "¡Ocurrió un error!",
-        message: "Debe agregar al menos una línea de factura.",
+        message: "Debe agregar al menos una línea de venta.",
         icon: Icons.cancel,
         backgroundColor: AppColors.invalid,
       );
@@ -199,68 +300,92 @@ class InvoiceController extends GetxController {
       return;
     }
 
-    final parsedTotalPayed = double.tryParse(totalPayed.value) ?? 0.0;
     final totalAmount = calculateTotalAmount();
+    final totalPaid = payments.fold(0.0, (sum, payment) => sum + payment.amount);
 
-    if (parsedTotalPayed == totalAmount) {
-      type.value = "INV_P";
-    } else {
-      type.value = "INV_N_P";
-    }
+    type.value = totalPaid >= totalAmount ? "INV_P" : "INV_N_P";
 
     final invoice = Invoice(
+      id: isUpdate
+          ? invoices.firstWhere((inv) => inv.documentNo == documentNo.value).id
+          : null,
       documentNo: documentNo.value,
       type: type.value,
       totalAmount: totalAmount,
-      totalPayed: parsedTotalPayed,
+      totalPayed: totalPaid,
       refTotalAmount: totalAmount,
-      refTotalPayed: parsedTotalPayed,
+      refTotalPayed: totalPaid,
       clientId: selectedClient.value!.id!,
+      note: note.value,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      updatedAt: isUpdate ? DateTime.now().millisecondsSinceEpoch : null,
     );
 
     try {
-      final invoiceId = await dbHelper.insertInvoice(invoice);
+      final invoiceId = isUpdate
+          ? await dbHelper.updateInvoice(invoice)
+          : await dbHelper.insertInvoice(invoice);
 
-      for (var line in invoiceLines) {
-        final updatedLine = InvoiceLine(
-          productName: line.productName,
-          productPrice: line.productPrice,
-          refProductPrice: line.refProductPrice,
-          total: line.total,
-          refTotal: line.refTotal,
-          qty: line.qty,
-          productId: line.productId,
-          productSerial: line.productSerial,
-          invoiceId: invoiceId,
-          createdAt: line.createdAt,
-        );
-        await dbHelper.insertInvoiceLine(updatedLine);
+      if (!isUpdate) {
+        for (var line in invoiceLines) {
+          final updatedLine = InvoiceLine(
+            productName: line.productName,
+            productPrice: line.productPrice,
+            refProductPrice: line.refProductPrice,
+            total: line.total,
+            refTotal: line.refTotal,
+            qty: line.qty,
+            productId: line.productId,
+            productSerial: line.productSerial,
+            invoiceId: invoiceId,
+            createdAt: line.createdAt,
+          );
+          await dbHelper.insertInvoiceLine(updatedLine);
 
-        final product = await dbHelper.getProductById(line.productId);
-        if (line.productSerial.isNotEmpty) {
-          final serial = (await dbHelper.getSerialsByProductId(product!.id!))
-              .firstWhere((s) => s.serial == line.productSerial);
-          serial.status = 'usado';
-          await dbHelper.updateSerial(serial);
-        } else {
-          product!.serialsQty -= line.qty;
-          await dbHelper.updateProduct(product);
+          final product = await dbHelper.getProductById(line.productId);
+          if (product == null) continue;
+
+          if (line.productSerial.isNotEmpty) {
+            final serial = (await dbHelper.getSerialsByProductId(product.id!))
+                .firstWhere((s) => s.serial == line.productSerial);
+            serial.status = 'usado';
+            await dbHelper.updateSerial(serial);
+            product.serialsQty -= 1;
+            await dbHelper.updateProduct(product);
+          } else {
+            product.serialsQty -= line.qty;
+            await dbHelper.updateProduct(product);
+          }
         }
       }
+
+      for (var payment in payments) {
+        if (payment.id == null) {
+          final updatedPayment = Payment(
+            invoiceId: invoiceId,
+            paymentMethodId: payment.paymentMethodId,
+            amount: payment.amount,
+            createdAt: payment.createdAt,
+          );
+          await dbHelper.insertPayment(updatedPayment);
+        }
+      }
+
       Get.back();
       clearFields();
       fetchAllInvoices();
       CustomSnackbar.show(
         title: "¡Aprobado!",
-        message: "Factura guardada correctamente",
+        message: isUpdate
+            ? "Venta actualizada correctamente"
+            : "Venta guardada correctamente",
         icon: Icons.check_circle,
         backgroundColor: AppColors.principalGreen,
       );
     } catch (e) {
       CustomSnackbar.show(
         title: "¡Ocurrió un error!",
-        message: "Verifique los datos e intente nuevamente.",
+        message: "Verifique los datos e intente nuevamente: $e",
         icon: Icons.cancel,
         backgroundColor: AppColors.invalid,
       );
@@ -270,22 +395,54 @@ class InvoiceController extends GetxController {
   Future<void> payInvoice(int invoiceId) async {
     try {
       final invoice = invoices.firstWhere((inv) => inv.id == invoiceId);
-      invoice.type = 'INV_P';
-      invoice.totalPayed = invoice.totalAmount;
-      invoice.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      if (invoice.type == 'INV_P') {
+        CustomSnackbar.show(
+          title: "¡Advertencia!",
+          message: "Esta venta ya está pagada.",
+          icon: Icons.warning,
+          backgroundColor: AppColors.invalid,
+        );
+        return;
+      }
 
-      await dbHelper.updateInvoice(invoice);
-      fetchAllInvoices();
-      CustomSnackbar.show(
-        title: "¡Aprobado!",
-        message: "Factura pagada correctamente",
-        icon: Icons.check_circle,
-        backgroundColor: AppColors.principalGreen,
-      );
+      await loadInvoiceForPayment(invoiceId);
+      Get.to(() => InvoiceFormView(isPaymentMode: true));
     } catch (e) {
       CustomSnackbar.show(
         title: "¡Ocurrió un error!",
-        message: "No se pudo pagar la factura: $e",
+        message: "No se pudo preparar la venta para pago: $e",
+        icon: Icons.cancel,
+        backgroundColor: AppColors.invalid,
+      );
+    }
+  }
+
+  Future<void> loadInvoiceForPayment(int invoiceId) async {
+    try {
+      final db = await dbHelper.database;
+      final invoiceResult = await db.query(
+        'invoices',
+        where: 'id = ?',
+        whereArgs: [invoiceId],
+      );
+      if (invoiceResult.isEmpty) {
+        throw Exception('venta no encontrada');
+      }
+
+      final invoice = Invoice.fromMap(invoiceResult.first);
+      documentNo.value = invoice.documentNo;
+      type.value = invoice.type;
+      invoiceTotal.value = invoice.totalAmount;
+      selectedClient.value = await dbHelper.getClientById(invoice.clientId);
+
+      await loadInvoiceLines(invoiceId);
+
+      final paymentsResult = await dbHelper.getPaymentsByInvoice(invoiceId);
+      payments.assignAll(paymentsResult);
+    } catch (e) {
+      CustomSnackbar.show(
+        title: "¡Ocurrió un error!",
+        message: "No se pudo cargar la venta: $e",
         icon: Icons.cancel,
         backgroundColor: AppColors.invalid,
       );
@@ -305,6 +462,9 @@ class InvoiceController extends GetxController {
     products.clear();
     selectedQty.value = 1;
     invoiceTotal.value = 0.0;
+    payments.clear();
+    selectedPaymentMethod.value = null;
+    paymentAmount.value = '';
   }
 
   Future<void> fetchAllInvoices() async {
@@ -332,7 +492,9 @@ class InvoiceController extends GetxController {
   void applyFilters() {
     var filtered = originalInvoices.where((invoice) {
       final matchesSearch = searchQuery.isEmpty ||
-          invoice.documentNo.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          invoice.documentNo
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
           invoice.type.toLowerCase().contains(searchQuery.value.toLowerCase());
       final matchesUnpaid = !showUnpaidOnly.value || invoice.type == 'INV_N_P';
       return matchesSearch && matchesUnpaid;
@@ -354,7 +516,7 @@ class InvoiceController extends GetxController {
       invoiceLines.assignAll(lines);
       invoiceTotal.value = calculateTotalAmount();
     } catch (e) {
-      print('Error cargando líneas de factura: $e');
+      print('Error cargando líneas de venta: $e');
     } finally {
       isLoadingInvoiceLines.value = false;
     }

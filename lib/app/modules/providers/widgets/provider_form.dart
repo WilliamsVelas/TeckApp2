@@ -70,6 +70,27 @@ class ProviderForm extends StatelessWidget {
                 ..text = providerController.value.value,
               inputFormatters: InputFormatters.value(),
             ),
+            SizedBox(height: 16.0),
+            GenericFormInput(
+              label: 'Numero telefonico',
+              keyboardType: TextInputType.number,
+              icon: Icons.phone,
+              onChanged: (value) =>
+                  providerController.phoneNumber.value = value,
+              controller: TextEditingController()
+                ..text = providerController.phoneNumber.value,
+              inputFormatters: InputFormatters.numericCode(maxLength: 11),
+            ),
+            SizedBox(height: 16.0),
+            GenericFormInput(
+              label: 'Numero telefonico',
+              keyboardType: TextInputType.text,
+              icon: Icons.map,
+              onChanged: (value) => providerController.address.value = value,
+              controller: TextEditingController()
+                ..text = providerController.address.value,
+              inputFormatters: InputFormatters.textOnly(),
+            ),
             SizedBox(height: 32.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

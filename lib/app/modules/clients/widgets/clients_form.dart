@@ -80,6 +80,26 @@ class ClientForm extends StatelessWidget {
                 ..text = clientController.value.value,
               inputFormatters: InputFormatters.value(),
             ),
+            SizedBox(height: 16.0),
+            GenericFormInput(
+              label: 'Numero telefonico',
+              keyboardType: TextInputType.number,
+              icon: Icons.phone,
+              onChanged: (value) => clientController.phoneNumber.value = value,
+              controller: TextEditingController()
+                ..text = clientController.phoneNumber.value,
+              inputFormatters: InputFormatters.numericCode(maxLength: 11),
+            ),
+            SizedBox(height: 16.0),
+            GenericFormInput(
+              label: 'Ubicacion',
+              keyboardType: TextInputType.text,
+              icon: Icons.map,
+              onChanged: (value) => clientController.address.value = value,
+              controller: TextEditingController()
+                ..text = clientController.address.value,
+              inputFormatters: InputFormatters.textOnly(),
+            ),
             SizedBox(height: 32.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

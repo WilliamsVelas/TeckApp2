@@ -18,6 +18,8 @@ class ProviderController extends GetxController {
   final RxString lastName = ''.obs;
   final RxString businessName = ''.obs;
   final RxString value = ''.obs;
+  final RxString address = ''.obs;
+  final RxString phoneNumber = ''.obs;
 
   // Variable para rastrear el proveedor en edición
   final RxString editingProviderId = ''.obs;
@@ -58,6 +60,8 @@ class ProviderController extends GetxController {
     lastName.value = provider.lastName;
     businessName.value = provider.businessName;
     value.value = provider.value;
+    phoneNumber.value = provider.phoneNumber;
+    address.value = provider.address;
     openProviderForm(context);
   }
 
@@ -74,10 +78,13 @@ class ProviderController extends GetxController {
       createdAt: providerId == null
           ? DateTime.now().millisecondsSinceEpoch
           : providers.firstWhere((p) => p.id == providerId).createdAt,
-      updatedAt: providerId != null ? DateTime.now().millisecondsSinceEpoch : null,
+      updatedAt:
+          providerId != null ? DateTime.now().millisecondsSinceEpoch : null,
       isActive: providerId == null
           ? true
           : providers.firstWhere((p) => p.id == providerId).isActive,
+      address: address.value,
+      phoneNumber: phoneNumber.value,
     );
 
     try {
@@ -145,9 +152,18 @@ class ProviderController extends GetxController {
   void applyFilters() {
     var filtered = originalProviders.where((provider) {
       final matchesSearch = searchQuery.isEmpty ||
-          (provider.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
-          (provider.lastName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false) ||
-          (provider.businessName.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
+          (provider.name
+                  .toLowerCase()
+                  .contains(searchQuery.value.toLowerCase()) ??
+              false) ||
+          (provider.lastName
+                  .toLowerCase()
+                  .contains(searchQuery.value.toLowerCase()) ??
+              false) ||
+          (provider.businessName
+                  .toLowerCase()
+                  .contains(searchQuery.value.toLowerCase()) ??
+              false);
       final matchesStatus = showInactive.value || provider.isActive;
       return matchesSearch && matchesStatus;
     }).toList();

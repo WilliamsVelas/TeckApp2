@@ -4,6 +4,8 @@ class Provider {
   String lastName;
   String businessName;
   String value;
+  String address;
+  String phoneNumber;
   int createdAt;
   int? updatedAt;
   bool isActive;
@@ -14,6 +16,8 @@ class Provider {
     required this.lastName,
     required this.businessName,
     required this.value,
+    required this.address,
+    required this.phoneNumber,
     required this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -26,6 +30,8 @@ class Provider {
       'lastName': lastName,
       'businessName': businessName,
       'value': value,
+      'address': address,
+      'phoneNumber': phoneNumber,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
@@ -39,6 +45,8 @@ class Provider {
       lastName: map['lastName'] as String,
       businessName: map['businessName'] as String,
       value: map['value'] as String,
+      address: map['address'] as String,
+      phoneNumber: map['phoneNumber'] as String,
       createdAt: map['createdAt'] as int,
       updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,

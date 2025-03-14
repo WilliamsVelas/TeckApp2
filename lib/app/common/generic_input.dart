@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../theme/colors.dart';
+
 class GenericInput extends StatelessWidget {
   const GenericInput({
     super.key,
@@ -49,42 +51,46 @@ class GenericFormInput extends StatelessWidget {
   final String label;
   final TextInputType keyboardType;
   final IconData icon;
-  final Function(String) onChanged;
+  final void Function(String)? onChanged;
   final TextEditingController controller;
   final List<TextInputFormatter>? inputFormatters;
+  final bool readOnly; // Cambiamos 'enabled' por 'readOnly'
 
   const GenericFormInput({
-    super.key,
     required this.label,
     required this.keyboardType,
     required this.icon,
-    required this.onChanged,
+    this.onChanged,
     required this.controller,
     this.inputFormatters,
+    this.readOnly = false, // Por defecto, editable (no readOnly)
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      onChanged: onChanged,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      readOnly: readOnly, // Usa readOnly en lugar de enabled
+      onChanged: readOnly ? null : onChanged, // Desactiva onChanged si es readOnly
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.0),
-          borderSide: BorderSide.none,
+        border: OutlineInputBorder(),
+        labelStyle: TextStyle(color: AppColors.principalGray),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.principalGreen),
         ),
-        floatingLabelBehavior: FloatingLabelBehavior.never,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 0,
-          horizontal: 16.0,
+        enabledBorder: OutlineInputBorder( // Asegura el mismo estilo cuando no está enfocado
+          borderSide: BorderSide(color: AppColors.principalGray),
+        ),
+        // Evita que el estilo cambie cuando está "deshabilitado"
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.principalGray),
         ),
       ),
+      style: TextStyle(color: AppColors.principalWhite),
     );
   }
 }

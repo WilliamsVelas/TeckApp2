@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../database/models/invoice_lines_model.dart';
@@ -19,7 +20,7 @@ class InvoiceCard extends StatelessWidget {
     RxBool isExpanded = false.obs;
 
     return Obx(
-          () => GestureDetector(
+      () => GestureDetector(
         onTap: () => isExpanded.value = !isExpanded.value,
         child: Card(
           color: AppColors.onPrincipalBackground,
@@ -42,7 +43,9 @@ class InvoiceCard extends StatelessWidget {
                     Text(
                       invoice.type == "INV_P" ? "Pagada" : "Pendiente",
                       style: TextStyle(
-                        color: invoice.type == "INV_P" ? Colors.green : Colors.orange,
+                        color: invoice.type == "INV_P"
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                     ),
                   ],
@@ -64,7 +67,8 @@ class InvoiceCard extends StatelessWidget {
                             ),
                           );
                         }
-                        return Text('Cargando...', style: TextStyle(color: AppColors.principalGray));
+                        return Text('Cargando...',
+                            style: TextStyle(color: AppColors.principalGray));
                       },
                     ),
                     Text(
@@ -83,12 +87,15 @@ class InvoiceCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.receipt, color: AppColors.principalGreen),
-                          onPressed: () => controller.showInvoiceDetailsModal(invoice.id!, context),
+                          icon: Icon(Icons.receipt,
+                              color: AppColors.principalGreen),
+                          onPressed: () => controller.showInvoiceDetailsModal(
+                              invoice.id!, context),
                         ),
-                        if (invoice.type == 'INV_N_P') // Botón "Pagar" solo para INV_N_P
+                        if (invoice.type == 'INV_N_P')
                           IconButton(
-                            icon: Icon(Icons.payment, color: AppColors.principalGreen),
+                            icon: Icon(Icons.payment,
+                                color: AppColors.principalGreen),
                             onPressed: () => controller.payInvoice(invoice.id!),
                           ),
                       ],
@@ -113,113 +120,146 @@ class InvoiceDetailsModal extends StatelessWidget {
     final controller = Get.find<InvoiceController>();
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height *
+            0.35,
+        maxWidth: MediaQuery.of(context).size.width *
+            0.9,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Detalles',
-                style: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-          Obx(() {
-            if (controller.isLoadingInvoiceLines.value) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                child: CircularProgressIndicator(),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-          Obx(() {
-            if (controller.invoiceLines.isEmpty &&
-                !controller.isLoadingInvoiceLines.value) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                child: Text('Factura sin artículos',
-                    style: TextStyle(color: Colors.grey)),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-          Obx(() {
-            if (controller.invoiceLines.isNotEmpty) {
-              return Column(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Obx(() {
-                    final clientId = controller.invoices
-                        .firstWhere((inv) => inv.id == invoiceId)
-                        .clientId;
-                    return FutureBuilder<String>(
-                      future: controller.getClientName(clientId),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Cliente: ${snapshot.data!}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.principalBackground,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        }
-                        return SizedBox.shrink();
-                      },
-                    );
-                  }),
-                  SizedBox(height: 20),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: controller.invoiceLines.length,
-                    separatorBuilder: (_, __) => Divider(height: 20),
-                    itemBuilder: (context, index) {
-                      final line = controller.invoiceLines[index];
-                      return InvoiceLineItem(line: line);
-                    },
+                  Text(
+                    'Detalles',
+                    style: textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'TOTAL: ',
+                  Obx(
+                        () {
+                      final invoice = controller.invoices
+                          .firstWhere((inv) => inv.id == invoiceId);
+                      final date =
+                      DateTime.fromMillisecondsSinceEpoch(invoice.createdAt);
+                      final formattedDate =
+                      DateFormat('dd/MM/yyyy HH:mm').format(date);
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          formattedDate,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
+                            color: AppColors.principalBackground,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
                           ),
                         ),
-                        Obx(() => Text(
-                              '\$${controller.invoiceTotal.value.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green[700],
-                              ),
-                            )),
-                      ],
-                    ),
-                  )
+                      );
+                    },
+                  ),
                 ],
-              );
-            }
-            return SizedBox.shrink();
-          }),
-        ],
+              ),
+
+              SizedBox(height: 8.0),
+              Obx(() {
+                if (controller.isLoadingInvoiceLines.value) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+              Obx(() {
+                if (controller.invoiceLines.isEmpty &&
+                    !controller.isLoadingInvoiceLines.value) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: Text('Venta sin artículos',
+                        style: TextStyle(color: Colors.grey)),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+              Obx(() {
+                if (controller.invoiceLines.isNotEmpty) {
+                  return Column(
+                    children: [
+                      Obx(() {
+                        final clientId = controller.invoices
+                            .firstWhere((inv) => inv.id == invoiceId)
+                            .clientId;
+                        return FutureBuilder<String>(
+                          future: controller.getClientName(clientId),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Cliente: ${snapshot.data!}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.principalBackground,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            }
+                            return SizedBox.shrink();
+                          },
+                        );
+                      }),
+                      SizedBox(height: 20),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: controller.invoiceLines.length,
+                        separatorBuilder: (_, __) => Divider(height: 20),
+                        itemBuilder: (context, index) {
+                          final line = controller.invoiceLines[index];
+                          return InvoiceLineItem(line: line);
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              'TOTAL: ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Obx(() => Text(
+                                  '\$${controller.invoiceTotal.value.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green[700],
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return SizedBox.shrink();
+              }),
+            ],
+          ),
+        ),
       ),
     );
   }

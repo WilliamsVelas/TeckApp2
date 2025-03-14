@@ -26,6 +26,8 @@ class ClientsController extends GetxController {
   final RxString businessName = ''.obs;
   final RxString affiliateCode = ''.obs;
   final RxString value = ''.obs;
+  final RxString address = ''.obs;
+  final RxString phoneNumber = ''.obs;
 
   // Variable para rastrear el cliente en edición
   final RxString editingClientId = ''.obs;
@@ -67,6 +69,8 @@ class ClientsController extends GetxController {
     businessName.value = client.businessName;
     affiliateCode.value = client.affiliateCode;
     value.value = client.value;
+    phoneNumber.value = client.phoneNumber;
+    address.value = client.address;
     openClientForm(context);
   }
 
@@ -84,10 +88,13 @@ class ClientsController extends GetxController {
       createdAt: clientId == null
           ? DateTime.now().millisecondsSinceEpoch
           : clients.firstWhere((c) => c.id == clientId).createdAt,
-      updatedAt: clientId != null ? DateTime.now().millisecondsSinceEpoch : null,
+      updatedAt:
+          clientId != null ? DateTime.now().millisecondsSinceEpoch : null,
       isActive: clientId == null
           ? true
           : clients.firstWhere((c) => c.id == clientId).isActive,
+      address: address.value,
+      phoneNumber: phoneNumber.value,
     );
 
     try {

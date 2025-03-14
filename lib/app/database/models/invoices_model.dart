@@ -7,6 +7,7 @@ class Invoice {
   double? refTotalAmount;
   double? refTotalPayed;
   int clientId;
+  String? note;
   int createdAt;
   int? updatedAt;
   bool isActive;
@@ -20,6 +21,7 @@ class Invoice {
     this.refTotalAmount,
     this.refTotalPayed,
     required this.clientId,
+    this.note,
     required this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -35,6 +37,7 @@ class Invoice {
       'refTotalAmount': refTotalAmount,
       'refTotalPayed': refTotalPayed,
       'clientId': clientId,
+      'note': note,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'isActive': isActive ? 1 : 0,
@@ -51,6 +54,7 @@ class Invoice {
       refTotalAmount: map['refTotalAmount'] as double?,
       refTotalPayed: map['refTotalPayed'] as double?,
       clientId: map['clientId'] as int,
+      note: map['note'] as String?,
       createdAt: map['createdAt'] as int,
       updatedAt: map['updatedAt'] as int?,
       isActive: map['isActive'] == 1,

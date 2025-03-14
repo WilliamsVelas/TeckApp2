@@ -44,7 +44,7 @@ class ClientCard extends StatelessWidget {
                           size: 20,
                         ),
                         Text(
-                          client.value,
+                          "${client.value} (${client.phoneNumber})",
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.principalGray,
@@ -116,7 +116,7 @@ class ClientCard extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(
-                            Icons.delete,
+                            Icons.clear,
                             color: AppColors.invalid,
                           ),
                           onPressed: client.isActive

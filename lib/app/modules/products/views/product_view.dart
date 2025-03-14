@@ -32,6 +32,8 @@ class ProductView extends StatelessWidget {
         onRefresh: () async {
           controller.fetchAllProducts();
         },
+        color: AppColors.principalGreen,
+        backgroundColor: AppColors.onPrincipalBackground,
         child: Column(
           children: [
             Padding(

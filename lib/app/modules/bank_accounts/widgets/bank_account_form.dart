@@ -48,7 +48,7 @@ class BankAccountForm extends StatelessWidget {
               onChanged: (value) => bankAccountController.code.value = value,
               controller: TextEditingController()
                 ..text = bankAccountController.code.value,
-              inputFormatters: InputFormatters.numericCode(),
+              inputFormatters: InputFormatters.numericCode(maxLength: 4),
             ),
             SizedBox(height: 16.0),
             GenericFormInput(
@@ -59,7 +59,7 @@ class BankAccountForm extends StatelessWidget {
                   bankAccountController.numberAccount.value = value,
               controller: TextEditingController()
                 ..text = bankAccountController.numberAccount.value,
-              inputFormatters: InputFormatters.numericCode(),
+              inputFormatters: InputFormatters.numericCode(maxLength: 16),
             ),
             SizedBox(height: 16.0),
             Obx(

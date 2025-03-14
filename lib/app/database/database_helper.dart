@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:teck_app/app/database/models/payment.dart';
 import 'package:teck_app/app/database/models/products_model.dart';
 
 import 'models/bank_account_model.dart';
@@ -106,6 +107,8 @@ class DatabaseHelper {
       businessName TEXT,
       affiliateCode TEXT,
       value TEXT,
+      address TEXT,
+      phoneNumber TEXT,
       createdAt INTEGER,
       updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
@@ -120,6 +123,8 @@ class DatabaseHelper {
       lastName TEXT,
       businessName TEXT,
       value TEXT,
+      address TEXT,
+      phoneNumber TEXT,
       createdAt INTEGER,
       updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
@@ -175,6 +180,7 @@ class DatabaseHelper {
       refTotalAmount REAL,
       refTotalPayed REAL,
       clientId INTEGER,
+      note TEXT,
       createdAt INTEGER,
       updatedAt INTEGER,
       isActive INTEGER DEFAULT 1
@@ -199,6 +205,17 @@ class DatabaseHelper {
       isActive INTEGER DEFAULT 1
     )
   ''');
+
+    await db.execute('''
+  CREATE TABLE payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoiceId INTEGER,
+    paymentMethodId INTEGER,
+    amount REAL,
+    method TEXT, 
+    createdAt INTEGER
+  )
+''');
   }
 
   Future<void> close() async {
@@ -765,5 +782,55 @@ class DatabaseHelper {
     result.forEach((row) => print(row));
 
     return result;
+  }
+
+  Future<int> insertPayment(Payment payment) async {
+    final db = await database;
+    return await db.insert('payments', payment.toMap());
+  }
+
+  Future<List<Payment>> getPaymentsByInvoice(int invoiceId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'payments',
+      where: 'invoiceId = ?',
+      whereArgs: [invoiceId],
+    );
+
+    print("pagos = ${maps}");
+
+    return List.generate(
+      maps.length,
+      (i) {
+        return Payment.fromMap(maps[i]);
+      },
+    );
+  }
+
+  Future<double> getTotalPaid(int invoiceId) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT SUM(amount) as totalPaid FROM payments WHERE invoiceId = ?',
+      [invoiceId],
+    );
+
+    return (result.first['totalPaid'] ?? 0.0) as double;
+  }
+
+  Future<double> getRemainingBalance(int invoiceId) async {
+    final db = await database;
+    final invoice = await db.query(
+      'invoices',
+      columns: ['totalAmount'],
+      where: 'id = ?',
+      whereArgs: [invoiceId],
+    );
+
+    if (invoice.isEmpty) return 0.0;
+
+    final totalAmount = (invoice.first['totalAmount'] ?? 0.0) as double;
+    final totalPaid = await getTotalPaid(invoiceId);
+
+    return totalAmount - totalPaid;
   }
 }

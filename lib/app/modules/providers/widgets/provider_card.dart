@@ -43,9 +43,9 @@ class ProviderCard extends StatelessWidget {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          provider.value,
+                          "${provider.value} (${provider.phoneNumber})",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: AppColors.principalGray,
                           ),
                         ),
@@ -87,10 +87,9 @@ class ProviderCard extends StatelessWidget {
                           }
                               : null,
                         ),
-
                         IconButton(
                           icon: Icon(
-                            Icons.delete,
+                            Icons.clear,
                             color: AppColors.invalid,
                           ),
                           onPressed: provider.isActive

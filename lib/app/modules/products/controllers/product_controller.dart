@@ -228,7 +228,6 @@ class ProductController extends GetxController {
     try {
       if (editingProductId.value.isEmpty) {
         int productId = await dbHelper.insertProduct(product);
-        print('Producto guardado con ID: $productId');
 
         if (isSerial.value) {
           for (var serialNumber in serials) {
