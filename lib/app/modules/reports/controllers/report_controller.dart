@@ -4,30 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../theme/colors.dart';
 import '../../../common/custom_snakcbar.dart';
 import '../../../database/database_helper.dart';
 import '../../../database/models/reports.dart';
-
-import 'package:path_provider/path_provider.dart';
-
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-
 import '../../../database/models/user_model.dart';
 
 class ReportController extends GetxController {
   final dbHelper = DatabaseHelper();
 
-  final Rx<User?> userLogged = Rx<User?>(null);
+  final Rx<UserApp?> userLogged = Rx<UserApp?>(null);
 
   Future<List<SalesReport>> fetchSalesReport(int startDate, int endDate) async {
     final data = await dbHelper.getSalesReport(startDate, endDate);
 
-    final List<User> users = await dbHelper.getUsers();
+    final List<UserApp> users = await dbHelper.getUsers();
     final user = users.isNotEmpty ? users.first : null;
 
     userLogged.value = user;
@@ -299,7 +296,7 @@ class ReportController extends GetxController {
     final formattedEmissionDate =
         DateFormat('dd/MM/yyyy HH:mm').format(emissionDate);
 
-    final List<User> users = await dbHelper.getUsers();
+    final List<UserApp> users = await dbHelper.getUsers();
     final user = users.isNotEmpty ? users.first : null;
     final userFullName =
         user != null ? '${user.name} ${user.lastName}' : 'Usuario Desconocido';
@@ -425,9 +422,11 @@ class ReportController extends GetxController {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Total General',
-                    style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        font: font, fontWeight: pw.FontWeight.bold)),
                 pw.Text(totalGeneral.toStringAsFixed(2),
-                    style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        font: font, fontWeight: pw.FontWeight.bold)),
               ],
             ),
           ),

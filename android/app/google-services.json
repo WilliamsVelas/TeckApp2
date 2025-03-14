@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "407301559175",
+    "project_id": "teckapp",
+    "storage_bucket": "teckapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407301559175:android:25e12a54b44accc223f922",
+        "android_client_info": {
+          "package_name": "com.welas.teck_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "407301559175-ahl954hgme470u77oajpi5nfbemhsrdj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.welas.teck_app",
+            "certificate_hash": "f16a4b8dd2382455d3bff9871f07007090207adc"
+          }
+        },
+        {
+          "client_id": "407301559175-2dm4d1kc249rgd6665rs1nglv4r2gdu9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWHFHWphksskKoIi7YxWhDMypwaV6jj98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "407301559175-2dm4d1kc249rgd6665rs1nglv4r2gdu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

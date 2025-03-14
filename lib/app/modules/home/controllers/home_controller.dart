@@ -48,7 +48,7 @@ class HomeController extends GetxController {
   bool get showBottomNav => currentIndex != 3;
 
   Future<void> fetchUser() async {
-    final List<User> users = await dbHelper.getUsers();
+    final List<UserApp> users = await dbHelper.getUsers();
     if (users.isNotEmpty) {
       username.value = users.first.username;
     }else{

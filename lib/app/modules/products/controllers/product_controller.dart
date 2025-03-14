@@ -10,7 +10,6 @@ import '../../../database/models/categories_model.dart';
 import '../../../database/models/providers_model.dart';
 import '../../../database/models/serials_model.dart';
 import '../views/product_card.dart';
-import '../views/product_form.dart';
 import '../views/product_view.dart';
 
 class ProductController extends GetxController {
@@ -30,21 +29,17 @@ class ProductController extends GetxController {
   final RxList<Category> categories = <Category>[].obs;
   final RxList<Provider> providers = <Provider>[].obs;
 
-  // Serials
   final RxList<Serial> productSerials = <Serial>[].obs;
   final RxBool isLoadingSerials = false.obs;
 
-  // Selected Values
   final Rx<Category?> selectedCategory = Rx<Category?>(null);
   final Rx<Provider?> selectedProvider = Rx<Provider?>(null);
 
-  // Product
   final RxString name = ''.obs;
   final RxString code = ''.obs;
   final RxString price = ''.obs;
   final RxString minStock = ''.obs;
 
-  // Controladores de texto
   final nameController = TextEditingController();
   final codeController = TextEditingController();
   final priceController = TextEditingController();

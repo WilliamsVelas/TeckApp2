@@ -33,7 +33,25 @@ class ReportView extends GetView<ReportController> {
           children: [
             _buildReportItem(
               context,
-              reportName: 'Reporte de Ventas',
+              reportName: 'Ventas',
+              onPrintPressed: () => _showDateRangeDialog(context),
+            ),
+            SizedBox(height: 6.0),
+            _buildReportItem(
+              context,
+              reportName: 'Ventas por Categorias',
+              onPrintPressed: () => _showDateRangeDialog(context),
+            ),
+            SizedBox(height: 6.0),
+            _buildReportItem(
+              context,
+              reportName: 'Clientes',
+              onPrintPressed: () => _showDateRangeDialog(context),
+            ),
+            SizedBox(height: 6.0),
+            _buildReportItem(
+              context,
+              reportName: 'Productos',
               onPrintPressed: () => _showDateRangeDialog(context),
             ),
           ],

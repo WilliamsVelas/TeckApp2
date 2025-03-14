@@ -1,4 +1,4 @@
-class User {
+class UserApp {
   int? id;
   String name;
   String lastName;
@@ -7,7 +7,7 @@ class User {
   int? updatedAt;
   bool isActive;
 
-  User({
+  UserApp({
     this.id,
     required this.name,
     required this.lastName,
@@ -29,8 +29,8 @@ class User {
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
+  factory UserApp.fromMap(Map<String, dynamic> map) {
+    return UserApp(
       id: map['id'] as int?,
       name: map['name'] as String,
       lastName: map['lastName'] as String,

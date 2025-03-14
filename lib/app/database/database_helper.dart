@@ -712,13 +712,13 @@ class DatabaseHelper {
   }
 
   // Users
-  Future<int> insertUser(User user) async {
+  Future<int> insertUser(UserApp user) async {
     final db = await database;
     user.isActive = true;
     return await db.insert('users', user.toMap());
   }
 
-  Future<List<User>> getUsers() async {
+  Future<List<UserApp>> getUsers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'users',
@@ -727,11 +727,11 @@ class DatabaseHelper {
     );
 
     return List.generate(maps.length, (i) {
-      return User.fromMap(maps[i]);
+      return UserApp.fromMap(maps[i]);
     });
   }
 
-  Future<int> updateUser(User user) async {
+  Future<int> updateUser(UserApp user) async {
     final db = await database;
     return await db.update(
       'users',
@@ -741,7 +741,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<User?> getUserById(int id) async {
+  Future<UserApp?> getUserById(int id) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'users',
@@ -751,7 +751,7 @@ class DatabaseHelper {
     );
 
     if (maps.isNotEmpty) {
-      return User.fromMap(maps.first);
+      return UserApp.fromMap(maps.first);
     } else {
       return null;
     }

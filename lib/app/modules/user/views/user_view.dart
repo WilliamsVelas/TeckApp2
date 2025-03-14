@@ -87,6 +87,29 @@ class UserView extends GetView<UserController> {
                     ? 'Activo'
                     : 'Inactivo',
               ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: ElevatedButton(
+                  onPressed: () => controller.logout(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.invalid,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 12.0),
+                    child: Text(
+                      'Cerrar sesión',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: AppColors.onPrincipalBackground,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

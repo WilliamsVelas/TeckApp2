@@ -1,6 +1,8 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:teck_app/app/modules/all_options/bindings/all_options_binding.dart';
 import 'package:teck_app/app/modules/all_options/views/all_options_view.dart';
+import 'package:teck_app/app/modules/auth_selection/bindings/auth_selection_binding.dart';
+import 'package:teck_app/app/modules/auth_selection/views/auth_selection_view.dart';
 import 'package:teck_app/app/modules/bank_accounts/bindings/bank_account_binding.dart';
 import 'package:teck_app/app/modules/bank_accounts/views/bank_account_view.dart';
 import 'package:teck_app/app/modules/categories/bindings/categories_binding.dart';
@@ -24,9 +26,15 @@ import 'package:teck_app/app/modules/user/views/user_view.dart';
 import 'package:teck_app/app/routes/app_routes.dart';
 
 class AppPages {
-  static const initial = AppRoutes.HOME;
+  static const initial = AppRoutes.AUTH_SELECTION;
 
   static final routes = [
+    //Auth selection view
+    GetPage(
+      name: AppRoutes.AUTH_SELECTION,
+      page: () => AuthSelectionView(),
+      binding: AuthSelectionBinding(),
+    ),
     //Home view
     GetPage(
       name: AppRoutes.HOME,

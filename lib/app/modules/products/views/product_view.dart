@@ -126,7 +126,7 @@ class ProductView extends StatelessWidget {
             ),
             SizedBox(height: 16),
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+              width: MediaQuery.of(context).size.width * 0.8,
               child: ElevatedButton(
                 onPressed: () {
                   _openProductForm(context);
