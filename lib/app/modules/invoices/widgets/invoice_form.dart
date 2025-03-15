@@ -463,7 +463,6 @@ class InvoiceForm extends StatelessWidget {
               onChanged: (value) => invoiceController.note.value = value,
               controller: TextEditingController()
                 ..text = invoiceController.note.value,
-              inputFormatters: InputFormatters.textOnly(),
             ),
             SizedBox(height: 32.0),
             Row(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,8 +7,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../theme/colors.dart';
+import '../../reports/widgets/date_selector.dart';
 import '../controllers/statistics_controller.dart';
 
 class StatisticsView extends GetView<StatisticsController> {
@@ -18,11 +22,11 @@ class StatisticsView extends GetView<StatisticsController> {
       appBar: AppBar(
         backgroundColor: AppColors.onPrincipalBackground,
         leading: IconButton(
-          icon: Icon(Icons.keyboard_arrow_left_outlined,
+          icon: const Icon(Icons.keyboard_arrow_left_outlined,
               color: AppColors.principalWhite),
           onPressed: () => Get.back(),
         ),
-        title: Text(
+        title: const Text(
           'Estadísticas',
           style: TextStyle(color: AppColors.principalWhite),
         ),
@@ -30,14 +34,54 @@ class StatisticsView extends GetView<StatisticsController> {
       backgroundColor: AppColors.onPrincipalBackground,
       body: Obx(
         () => controller.isLoading.value
-            ? Center(
+            ? const Center(
                 child:
                     CircularProgressIndicator(color: AppColors.principalWhite))
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    DateSelector(
+                      label: 'Fecha de inicio',
+                      selectedDate: controller.startDate.value,
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          controller.startDate.value =
+                              DateTime(picked.year, picked.month, picked.day);
+                          if (controller.endDate.value != null) {
+                            controller.updateStatistics();
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DateSelector(
+                      label: 'Fecha de fin',
+                      selectedDate: controller.endDate.value,
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          controller.endDate.value = DateTime(picked.year,
+                              picked.month, picked.day, 23, 59, 59, 999);
+                          if (controller.startDate.value != null) {
+                            controller.updateStatistics();
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 32),
                     Text(
                       'Productos más vendidos',
                       style: textTheme.displaySmall?.copyWith(
@@ -46,54 +90,67 @@ class StatisticsView extends GetView<StatisticsController> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     if (controller.topSoldProducts.isNotEmpty) ...[
                       Container(
-                        height: 200,
-                        child: BarChart(
-                          BarChartData(
-                            alignment: BarChartAlignment.spaceAround,
-                            barGroups: controller.topSoldProducts
+                        height: 250,
+                        child: PieChart(
+                          PieChartData(
+                            sections: controller.topSoldProducts
                                 .asMap()
                                 .entries
-                                .map((entry) => BarChartGroupData(
-                                      x: entry.key,
-                                      barRods: [
-                                        BarChartRodData(
-                                          toY: entry.value['total_sold']
-                                              .toDouble(),
-                                          color: AppColors.principalGreen,
-                                          width: 16,
-                                        ),
-                                      ],
-                                    ))
-                                .toList(),
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  getTitlesWidget: (value, meta) => Text(
-                                    controller.topSoldProducts[value.toInt()]
-                                        ['name'],
-                                    style: TextStyle(
-                                        color: AppColors.principalWhite,
-                                        fontSize: 10),
-                                  ),
+                                .map((entry) {
+                              final index = entry.key;
+                              final product = entry.value;
+                              return PieChartSectionData(
+                                value: product['total_sold'].toDouble(),
+                                title:
+                                    '${product['name']}\n${product['total_sold']}',
+                                color: colors[index % colors.length],
+                                radius: 80,
+                                titleStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.principalWhite,
                                 ),
-                              ),
-                              leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: true)),
+                              );
+                            }).toList(),
+                            sectionsSpace: 4,
+                            centerSpaceRadius: 50,
+                            pieTouchData: PieTouchData(
+                              touchCallback:
+                                  (FlTouchEvent event, pieTouchResponse) {
+                                if (event is FlTapUpEvent &&
+                                    pieTouchResponse != null) {
+                                  final sectionIndex = pieTouchResponse
+                                      .touchedSection?.touchedSectionIndex;
+                                  if (sectionIndex != null &&
+                                      sectionIndex >= 0) {
+                                    final product = controller
+                                        .topSoldProducts[sectionIndex];
+                                    Get.snackbar(
+                                      'Producto',
+                                      '${product['name']}: ${product['total_sold']} vendidos',
+                                      backgroundColor: AppColors.principalGreen,
+                                      colorText: AppColors.principalWhite,
+                                    );
+                                  }
+                                }
+                              },
                             ),
                           ),
+                          swapAnimationDuration:
+                              const Duration(milliseconds: 500),
+                          swapAnimationCurve: Curves.easeInOut,
                         ),
                       ),
                     ] else ...[
-                      Text(
+                      const Text(
                         'No hay datos disponibles',
                         style: TextStyle(color: AppColors.principalWhite),
                       ),
                     ],
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                     Text(
                       'Productos cerca del stock mínimo',
                       style: textTheme.displaySmall?.copyWith(
@@ -102,116 +159,193 @@ class StatisticsView extends GetView<StatisticsController> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     if (controller.nearMinStockProducts.isNotEmpty) ...[
                       Container(
-                        height: 200,
-                        child: BarChart(
-                          BarChartData(
-                            alignment: BarChartAlignment.spaceAround,
-                            barGroups: controller.nearMinStockProducts
+                        height: 250,
+                        child: PieChart(
+                          PieChartData(
+                            sections: controller.nearMinStockProducts
                                 .asMap()
                                 .entries
-                                .map((entry) => BarChartGroupData(
-                                      x: entry.key,
-                                      barRods: [
-                                        BarChartRodData(
-                                          toY: entry.value['serialsQty']
-                                              .toDouble(),
-                                          color: AppColors.invalid,
-                                          width: 16,
-                                        ),
-                                      ],
-                                    ))
-                                .toList(),
+                                .map((entry) {
+                              final index = entry.key;
+                              final product = entry.value;
+                              return PieChartSectionData(
+                                value: product['serialsQty'].toDouble(),
+                                title:
+                                    '${product['name']}\n${product['serialsQty']}',
+                                color: colors[index % colors.length],
+                                radius: 80,
+                                titleStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.principalWhite,
+                                ),
+                              );
+                            }).toList(),
+                            sectionsSpace: 4,
+                            centerSpaceRadius: 50,
+                            pieTouchData: PieTouchData(
+                              touchCallback:
+                                  (FlTouchEvent event, pieTouchResponse) {
+                                if (event is FlTapUpEvent &&
+                                    pieTouchResponse != null) {
+                                  final sectionIndex = pieTouchResponse
+                                      .touchedSection?.touchedSectionIndex;
+                                  if (sectionIndex != null &&
+                                      sectionIndex >= 0) {
+                                    final product = controller
+                                        .nearMinStockProducts[sectionIndex];
+                                    Get.snackbar(
+                                      'Producto',
+                                      '${product['name']}: ${product['serialsQty']} en stock',
+                                      backgroundColor: AppColors.invalid,
+                                      colorText: AppColors.principalWhite,
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ),
+                          swapAnimationDuration:
+                              const Duration(milliseconds: 500),
+                          swapAnimationCurve: Curves.easeInOut,
+                        ),
+                      ),
+                    ] else ...[
+                      const Text(
+                        'No hay datos disponibles',
+                        style: TextStyle(color: AppColors.principalWhite),
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                    Text(
+                      'Ventas por fecha',
+                      style: textTheme.displaySmall?.copyWith(
+                        fontSize: 16,
+                        color: AppColors.principalWhite,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (controller.salesByDate.isNotEmpty) ...[
+                      Container(
+                        height: 300,
+                        child: LineChart(
+                          LineChartData(
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: controller.salesByDate
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  final index = entry.key;
+                                  final sale = entry.value;
+                                  return FlSpot(index.toDouble(),
+                                      sale['total_sales']?.toDouble() ?? 0.0);
+                                }).toList(),
+                                isCurved: true,
+                                color: AppColors.principalGreen,
+                                barWidth: 4,
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color:
+                                      AppColors.principalGreen.withOpacity(0.3),
+                                ),
+                              ),
+                            ],
                             titlesData: FlTitlesData(
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  getTitlesWidget: (value, meta) => Text(
-                                    controller
-                                            .nearMinStockProducts[value.toInt()]
-                                        ['name'],
-                                    style: TextStyle(
-                                        color: AppColors.principalWhite,
-                                        fontSize: 10),
-                                  ),
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    final index = value.toInt();
+                                    if (index >= 0 &&
+                                        index < controller.salesByDate.length) {
+                                      final saleDate =
+                                          controller.salesByDate[index]
+                                              ['sale_date'] as String?;
+                                      if (saleDate != null) {
+                                        final date = DateTime.parse(saleDate);
+                                        return Text(
+                                          DateFormat('dd/MM').format(date),
+                                          style: const TextStyle(
+                                              color: AppColors.principalWhite,
+                                              fontSize: 12),
+                                        );
+                                      }
+                                    }
+                                    return const Text('');
+                                  },
                                 ),
                               ),
                               leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: true)),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) => Text(
+                                    value.toInt().toString(),
+                                    style: const TextStyle(
+                                        color: AppColors.principalWhite,
+                                        fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                              topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false)),
+                              rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false)),
+                            ),
+                            gridData:
+                                FlGridData(show: true, drawVerticalLine: false),
+                            borderData: FlBorderData(show: false),
+                            lineTouchData: LineTouchData(
+                              touchTooltipData: LineTouchTooltipData(
+                                getTooltipItems: (touchedSpots) {
+                                  return touchedSpots.map((spot) {
+                                    final sale =
+                                        controller.salesByDate[spot.x.toInt()];
+                                    final saleDate =
+                                        sale['sale_date'] as String?;
+                                    if (saleDate != null) {
+                                      final date = DateTime.parse(saleDate);
+                                      return LineTooltipItem(
+                                        '${DateFormat('dd/MM/yyyy').format(date)}\n\$${sale['total_sales'] ?? 0}',
+                                        const TextStyle(
+                                            color: AppColors.principalWhite),
+                                      );
+                                    }
+                                    return const LineTooltipItem(
+                                        'Dato inválido',
+                                        TextStyle(
+                                            color: AppColors.principalWhite));
+                                  }).toList();
+                                },
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ] else ...[
-                      Text(
+                      const Text(
                         'No hay datos disponibles',
                         style: TextStyle(color: AppColors.principalWhite),
                       ),
                     ],
-                    // SizedBox(height: 32),
-                    // Text(
-                    //   'Ventas por fecha',
-                    //   style: textTheme.displaySmall?.copyWith(
-                    //     fontSize: 16,
-                    //     color: AppColors.principalWhite,
-                    //     fontWeight: FontWeight.bold,
-                    //   ),
-                    // ),
-                    // SizedBox(height: 16),
-                    // if (controller.salesByDate.isNotEmpty) ...[
-                    //   Container(
-                    //     height: 200,
-                    //     child: LineChart(
-                    //       LineChartData(
-                    //         lineBarsData: [
-                    //           LineChartBarData(
-                    //             spots: controller.salesByDate
-                    //                 .asMap()
-                    //                 .entries
-                    //                 .map((entry) => FlSpot(
-                    //                       entry.key.toDouble(),
-                    //                       entry.value['total_sales'].toDouble(),
-                    //                     ))
-                    //                 .toList(),
-                    //             isCurved: true,
-                    //             color: AppColors.principalGreen,
-                    //             dotData: FlDotData(show: false),
-                    //           ),
-                    //         ],
-                    //         titlesData: FlTitlesData(
-                    //           bottomTitles: AxisTitles(
-                    //             sideTitles: SideTitles(
-                    //               showTitles: true,
-                    //               getTitlesWidget: (value, meta) => Text(
-                    //                 controller.salesByDate[value.toInt()]
-                    //                         ['sale_date']
-                    //                     .substring(5),
-                    //                 style: TextStyle(
-                    //                     color: AppColors.principalWhite,
-                    //                     fontSize: 10),
-                    //               ),
-                    //             ),
-                    //           ),
-                    //           leftTitles: AxisTitles(
-                    //               sideTitles: SideTitles(
-                    //             showTitles: true,
-                    //           ),),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ] else ...[
-                    //   Text(
-                    //     'No hay datos disponibles',
-                    //     style: TextStyle(color: AppColors.principalWhite),
-                    //   ),
-                    // ],
                   ],
                 ),
               ),
       ),
     );
   }
+
+  final List<Color> colors = [
+    AppColors.principalGreen,
+    Colors.red,
+    Colors.blue,
+    Colors.yellow,
+    Colors.purple,
+  ];
 }

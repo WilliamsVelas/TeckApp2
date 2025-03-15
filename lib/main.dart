@@ -18,7 +18,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final authController = Get.put(AuthSelectionController());
   final isAuthenticated = FirebaseAuth.instance.currentUser != null;
 
   runApp(MyApp(

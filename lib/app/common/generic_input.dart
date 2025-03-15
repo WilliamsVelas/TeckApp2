@@ -54,7 +54,7 @@ class GenericFormInput extends StatelessWidget {
   final void Function(String)? onChanged;
   final TextEditingController controller;
   final List<TextInputFormatter>? inputFormatters;
-  final bool readOnly; // Cambiamos 'enabled' por 'readOnly'
+  final bool readOnly;
 
   const GenericFormInput({
     required this.label,
@@ -63,7 +63,7 @@ class GenericFormInput extends StatelessWidget {
     this.onChanged,
     required this.controller,
     this.inputFormatters,
-    this.readOnly = false, // Por defecto, editable (no readOnly)
+    this.readOnly = false,
   });
 
   @override
@@ -72,25 +72,24 @@ class GenericFormInput extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
-      readOnly: readOnly, // Usa readOnly en lugar de enabled
-      onChanged: readOnly ? null : onChanged, // Desactiva onChanged si es readOnly
+      readOnly: readOnly,
+      onChanged: readOnly ? null : onChanged,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(),
-        labelStyle: TextStyle(color: AppColors.principalGray),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.principalGreen),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder( // Asegura el mismo estilo cuando no está enfocado
-          borderSide: BorderSide(color: AppColors.principalGray),
-        ),
-        // Evita que el estilo cambie cuando está "deshabilitado"
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.principalGray),
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 0,
+          horizontal: 16.0,
         ),
       ),
-      style: TextStyle(color: AppColors.principalWhite),
+      style: TextStyle(color: AppColors.principalBackground),
     );
   }
 }

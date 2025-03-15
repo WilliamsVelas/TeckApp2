@@ -27,7 +27,7 @@ class UserForm extends StatelessWidget {
               onChanged: (value) => controller.nameController.text = value,
               inputFormatters: InputFormatters.textOnly(),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             GenericFormInput(
               label: 'Apellido',
               keyboardType: TextInputType.text,
@@ -36,7 +36,7 @@ class UserForm extends StatelessWidget {
               onChanged: (value) => controller.lastNameController.text = value,
               inputFormatters: InputFormatters.textOnly(),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             GenericFormInput(
               label: 'Nombre de usuario',
               keyboardType: TextInputType.text,
@@ -45,7 +45,7 @@ class UserForm extends StatelessWidget {
               onChanged: (value) => controller.usernameController.text = value,
               inputFormatters: InputFormatters.textOnly(),
             ),
-            SizedBox(height: 32.0),
+            const SizedBox(height: 32.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -53,8 +53,10 @@ class UserForm extends StatelessWidget {
                   onPressed: () => controller.saveUser(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.principalButton,
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                   child: Text('Guardar'),
                 ),
@@ -62,10 +64,12 @@ class UserForm extends StatelessWidget {
                   onPressed: () => controller.clearFields(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.invalid,
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
-                  child: Text('Borrar'),
+                  child: const Text('Borrar'),
                 ),
               ],
             ),
