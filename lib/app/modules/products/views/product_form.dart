@@ -108,8 +108,7 @@ class ProductForm extends StatelessWidget {
                   onChanged: (value) =>
                   productController.serialsQty.value = int.tryParse(value) ?? 0,
                 )
-              else if (productController.editingProductId.value.isEmpty &&
-                  productController.isSerial.value)
+              else if (productController.isSerial.value)
                 Column(
                   children: [
                     Row(

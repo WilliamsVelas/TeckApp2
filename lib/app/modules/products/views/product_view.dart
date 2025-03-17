@@ -430,7 +430,7 @@ class ProductFormView extends StatelessWidget {
             },
           ),
           title: Text(
-            'Agregar Producto',
+            productController.editingProductId.value.isEmpty ? 'Agregar Producto' : 'Editar Producto',
             style: TextStyle(
               fontSize: 20.0,
               fontWeight: FontWeight.bold,
